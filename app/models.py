@@ -273,6 +273,7 @@ class Notification(BaseModel):
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_sent_to_all: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped["User"] = relationship(
         "User", back_populates="notifications", lazy="raise_on_sql"

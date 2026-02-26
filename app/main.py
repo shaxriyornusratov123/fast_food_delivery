@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from app.routers import auth_router
+from app.admin.settings import admin
+
 
 app = FastAPI(
     title="Foodify delivery service",
@@ -8,3 +10,5 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+
+admin.mount_to(app=app)
