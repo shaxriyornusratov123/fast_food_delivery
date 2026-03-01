@@ -14,6 +14,12 @@ from app.dependencies import current_user_dep
 router = APIRouter(prefix="/products", tags=["Products"])
 
 
+@router.get("/list/")
+async def get_products(session: db_dep):
+    # TODO: list with search, filter
+    pass
+
+
 @router.get("/{product_id}", response_model=ProductListResponse)
 async def get_product(session: db_dep, product_id: int):
     stmt = select(Product).where(Product.id == product_id)
@@ -26,23 +32,10 @@ async def get_product(session: db_dep, product_id: int):
     return product
 
 
-@router.get("/{name}", response_model=ProductListResponse)
-async def get_product(session: db_dep, name: str):
-    stmt = select(Product).where(Product.name.ilike(f"%{name}%"))
-    res = session.execute(stmt)
-    product = res.scalars().all()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="product not found")
-
-    return product
-
-
 @router.post("/create")
 async def create_product(
     session: db_dep, create_data: ProductCreateRequest, current_user: current_user_dep
 ):
-
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="Not authorized to create product")
 
@@ -68,7 +61,6 @@ async def update_product(
     update_data: ProductUpdateRequest,
     current_user: current_user_dep,
 ):
-
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="Not authorized to update product")
 
@@ -99,7 +91,7 @@ async def update_product(
 async def delete_product(
     session: db_dep, product_id: int, current_user: current_user_dep
 ):
-
+    # product o'chmaydi, is_active=False boladi
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="Not authorized to delete product")
 
@@ -112,4 +104,3 @@ async def delete_product(
 
     session.delete(product)
     session.commit()
-

@@ -32,12 +32,12 @@ class BaseModel(Base):
 class User(BaseModel):
     __tablename__ = "users"
 
+    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=True)
     last_name: Mapped[str] = mapped_column(String(100), nullable=True)
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
     email: Mapped[str] = mapped_column(String(100), nullable=True)
-    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
-    password_hash: Mapped[str] = mapped_column(String, nullable=False)
     deleted_email: Mapped[str] = mapped_column(String(50), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -75,7 +75,7 @@ class Order(BaseModel):
         BigInteger, ForeignKey("promocodes.id"), nullable=True
     )
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
-    total_price: Mapped[float] = mapped_column(Float, nullable=False,default=0)
+    total_price: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped["User"] = relationship(
         "User", back_populates="orders", lazy="raise_on_sql"
@@ -310,6 +310,7 @@ class Branches(Base):
     address: Mapped[str] = mapped_column(String(200), nullable=False)
     working_hours: Mapped[str] = mapped_column(String(100), nullable=False)
     branch_phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    # TODO: long lat qoshish
 
     deliveries: Mapped[list["Delivery"]] = relationship(
         "Delivery", back_populates="branch", lazy="raise_on_sql"
@@ -346,6 +347,7 @@ class Delivery(BaseModel):
 
     order_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("orders.id"))
     courier_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("couriers.id"))
+    # courier userga FK boladi, userda role field boladi: oddiy, courier | is_courier
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
     status: Mapped[str] = mapped_column(String(20), nullable=False)
     delivery_time: Mapped[datetime] = mapped_column(
@@ -368,6 +370,7 @@ class Delivery(BaseModel):
 
 class Courier(BaseModel):
     __tablename__ = "couriers"
+    # TODO: remove
 
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -423,6 +426,7 @@ class Discount(BaseModel):
 
 class DiscountItem(Base):
     __tablename__ = "discount_items"
+    # TODO: remove
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     discount_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("discounts.id"))
