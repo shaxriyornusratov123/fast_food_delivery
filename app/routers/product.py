@@ -112,3 +112,4 @@ async def delete_product(
 
     session.delete(product)
     session.commit()
+
