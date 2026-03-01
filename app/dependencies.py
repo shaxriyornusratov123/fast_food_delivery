@@ -1,15 +1,14 @@
 from typing import Annotated
 from datetime import datetime, timezone
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.database import db_dep
 from app.models import User
-from app.utils import verify_password, decode_jwt_token
-from app.config import settings
+from app.utils import decode_jwt_token
 
 jwt_security = HTTPBearer(auto_error=False)
 
@@ -42,6 +41,7 @@ current_user_dep = Annotated[User, Depends(get_current_user)]
 def get_current_user_jwt(
     session: db_dep, credentials: HTTPAuthorizationCredentials = Depends(jwt_security)
 ):
+    # TODO: remove this duplicate
     if not credentials:
         raise HTTPException(status_code=401, detail="Not authenticated")
 

@@ -15,6 +15,7 @@ router = APIRouter(prefix="/register", tags=["Auth"])
 
 @router.post("/register", response_model=UserRegisterResponse)
 async def register_user(session: db_dep, data: UserRegisterRequest):
+    # TODO: cart birga create bolsin bitta transactionda
     stmt = select(User).where(User.email == data.email)
     res = session.execute(stmt).scalars().first()
 
@@ -37,7 +38,7 @@ async def register_user(session: db_dep, data: UserRegisterRequest):
     if not existing_user:
         user.is_active = True
         user.is_staff = True
-        user.is_superuser = True 
+        user.is_superuser = True
 
     session.add(user)
     session.commit()

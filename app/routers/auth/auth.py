@@ -4,9 +4,8 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from app.database import db_dep
-from app.dependencies import current_user_jwt_dep
 from app.models import User
-from app.schemas.auth import UserLoginRequest, RefreshToken, UserProfileResponse
+from app.schemas.auth import UserLoginRequest, RefreshToken
 from app.utils import verify_password, generate_jwt_token, decode_jwt_token
 
 router = APIRouter(prefix="/login", tags=["Auth"])
@@ -41,8 +40,3 @@ async def refresh(session: db_dep, data: RefreshToken):
     access_token = generate_jwt_token(user_id, is_access_only=True)
 
     return {"access_token": access_token}
-
-
-@router.get("/me", response_model=UserProfileResponse)
-async def me(current_user: current_user_jwt_dep):
-    return current_user
