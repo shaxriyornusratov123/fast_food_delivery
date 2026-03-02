@@ -28,7 +28,7 @@ async def create_branch(db:db_dep, request:Branch_create_req):
     db.commit()
     return branch
 
-@router.put("/update")
+@router.patch("/update")
 async def update_branch(db:db_dep, request:Branch_update_req):
     stmt = select(Branches).where(Branches.id==request.id)
     res = db.execute(stmt)
@@ -38,6 +38,7 @@ async def update_branch(db:db_dep, request:Branch_update_req):
         raise HTTPException(status_code=404, detail="Branch not found")
     
     if brnch:
+        brnch.id = request.id,
         brnch.address = request.address,
         brnch.branch_phone = request.phone,
         brnch.working_hours = request.working_hours
