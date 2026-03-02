@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from passlib.context import CryptContext
 
-from jose import jwt, JWTError
+from jose import  JWTError, jwt
 
 from app.config import settings
 
