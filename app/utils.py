@@ -26,8 +26,8 @@ def verify_password(plain_password: str, hashed_password: str):
 
 
 def generate_jwt_token(user_id: int, is_access_only: bool = False):
-    access_token = jwt.decode(
-        algorithms=settings.ALGORITHM,
+    access_token = jwt.encode(
+        algorithm=settings.ALGORITHM,
         key=settings.SECRET_KEY,
         claims={
             "sub": str(user_id),
@@ -40,12 +40,12 @@ def generate_jwt_token(user_id: int, is_access_only: bool = False):
         return access_token
 
     refresh_token = jwt.encode(
-        algorithms=settings.ALGORITHM,
+        algorithm=settings.ALGORITHM,
         key=settings.SECRET_KEY,
         claims={
             "sub": str(user_id),
             "exp": datetime.now(timezone.utc)
-            + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+            + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         },
     )
 

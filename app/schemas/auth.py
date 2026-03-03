@@ -29,15 +29,14 @@ class UserProfileResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    phone: str
+    phone: str | None = None
     email: EmailStr
-    username: str
+    username: str | None = None
     password_hash: str
-    deleted_email: bool
     is_active: bool
     is_staff: bool
     is_superuser: bool
-    is_deleted: bool
+    is_deleted: bool | None = None
 
 
 class UserLoginRequest(BaseModel):

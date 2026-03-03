@@ -1,8 +1,8 @@
-"""fix relationships
+"""fix pyproject.toml
 
-Revision ID: 05dc6ee8412c
-Revises: e5240c4d46cf
-Create Date: 2026-02-25 09:38:37.976788
+Revision ID: f0b527d5ca28
+Revises: a00bba169846
+Create Date: 2026-03-01 11:52:40.578561
 
 """
 
@@ -10,8 +10,8 @@ from typing import Sequence, Union
 
 
 # revision identifiers, used by Alembic.
-revision: str = "05dc6ee8412c"
-down_revision: Union[str, Sequence[str], None] = "e5240c4d46cf"
+revision: str = "f0b527d5ca28"
+down_revision: Union[str, Sequence[str], None] = "a00bba169846"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

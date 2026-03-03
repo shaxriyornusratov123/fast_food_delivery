@@ -15,6 +15,7 @@ router = APIRouter(prefix="/register", tags=["Auth"])
 
 @router.post("/register", response_model=UserRegisterResponse)
 async def register_user(session: db_dep, data: UserRegisterRequest):
+    # TODO: cart birga create bolsin bitta transactionda
     stmt = select(User).where(User.email == data.email)
     res = session.execute(stmt).scalars().first()
 

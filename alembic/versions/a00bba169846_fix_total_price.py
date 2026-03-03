@@ -1,8 +1,8 @@
-"""fix relationships
+"""fix total price
 
-Revision ID: 05dc6ee8412c
-Revises: e5240c4d46cf
-Create Date: 2026-02-25 09:38:37.976788
+Revision ID: a00bba169846
+Revises: 319717a0f9f2
+Create Date: 2026-03-01 10:54:12.786891
 
 """
 
@@ -10,8 +10,8 @@ from typing import Sequence, Union
 
 
 # revision identifiers, used by Alembic.
-revision: str = "05dc6ee8412c"
-down_revision: Union[str, Sequence[str], None] = "e5240c4d46cf"
+revision: str = "a00bba169846"
+down_revision: Union[str, Sequence[str], None] = "319717a0f9f2"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
