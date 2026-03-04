@@ -32,14 +32,15 @@ class BaseModel(Base):
 class User(BaseModel):
     __tablename__ = "users"
 
+    email: Mapped[str] = mapped_column(String(100), nullable=True)
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=True)
     last_name: Mapped[str] = mapped_column(String(100), nullable=True)
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
-    email: Mapped[str] = mapped_column(String(100), nullable=True)
     deleted_email: Mapped[str] = mapped_column(String(50), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_courier: Mapped[bool] = mapped_column(Boolean, default=False)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
@@ -61,6 +62,14 @@ class User(BaseModel):
     cart: Mapped["Cart"] = relationship(
         "Cart", back_populates="user", lazy="raise_on_sql"
     )
+    deliveries: Mapped[list["Delivery"]] = relationship(
+        "Delivery", back_populates="courier", lazy="raise_on_sql"
+    )
+    # refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+    #     "RefreshToken", back_populates="user", lazy="raise_on_sql"
+    # )
+
+    
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', phone='{self.phone}')>"
@@ -129,6 +138,9 @@ class Product(Base):
     subcategory_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("subcategories.id")
     )
+    discount_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("discounts.id"), nullable=True
+    )
     image_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("images.id"), nullable=True
     )
@@ -148,11 +160,11 @@ class Product(Base):
     likes: Mapped[list["Like"]] = relationship(
         "Like", back_populates="product", lazy="raise_on_sql"
     )
-    discount_items: Mapped[list["DiscountItem"]] = relationship(
-        "DiscountItem", back_populates="product", lazy="raise_on_sql"
-    )
     cart_items: Mapped[list["CartItem"]] = relationship(
         "CartItem", back_populates="product", lazy="raise_on_sql"
+    )
+    discount: Mapped["Discount"] = relationship(
+        "Discount", back_populates="products", lazy="raise_on_sql"
     )
 
     def __repr__(self):
@@ -208,7 +220,7 @@ class Cart(BaseModel):
         return f"<Cart(id={self.id}, user_id={self.user_id}, total_price={self.total_price})>"
 
 
-class CartItem(BaseModel):
+class CartItem(BaseModel): 
     __tablename__ = "cart_items"
 
     cart_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("carts.id"))
@@ -231,6 +243,7 @@ class Address(BaseModel):
     __tablename__ = "addresses"
 
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
+    location_name: Mapped[str] = mapped_column(String(100), nullable=True)
     latitude: Mapped[float] = mapped_column(Float, nullable=True)
     longitude: Mapped[float] = mapped_column(Float, nullable=True)
 
@@ -305,12 +318,13 @@ class Like(BaseModel):
 
 class Branches(Base):
     __tablename__ = "branches"
-
+    
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     address: Mapped[str] = mapped_column(String(200), nullable=False)
     working_hours: Mapped[str] = mapped_column(String(100), nullable=False)
     branch_phone: Mapped[str] = mapped_column(String(20), nullable=False)
-    # TODO: long lat qoshish
+    lattitude: Mapped[float] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float] = mapped_column(Float, nullable=True)
 
     deliveries: Mapped[list["Delivery"]] = relationship(
         "Delivery", back_populates="branch", lazy="raise_on_sql"
@@ -318,9 +332,7 @@ class Branches(Base):
     orders: Mapped[list["Order"]] = relationship(
         "Order", back_populates="branch", lazy="raise_on_sql"
     )
-    couriers: Mapped[list["Courier"]] = relationship(
-        "Courier", back_populates="branch", lazy="raise_on_sql"
-    )
+    
 
     def __repr__(self):
         return f"<Branch(id={self.id}, address='{self.address}', working_hours='{self.working_hours}', branch_phone='{self.branch_phone}')>"
@@ -346,7 +358,7 @@ class Delivery(BaseModel):
     __tablename__ = "deliveries"
 
     order_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("orders.id"))
-    courier_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("couriers.id"))
+    courier_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
     # courier userga FK boladi, userda role field boladi: oddiy, courier | is_courier
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
     status: Mapped[str] = mapped_column(String(20), nullable=False)
@@ -357,9 +369,10 @@ class Delivery(BaseModel):
     order: Mapped["Order"] = relationship(
         "Order", back_populates="delivery", lazy="raise_on_sql"
     )
-    courier: Mapped["Courier"] = relationship(
-        "Courier", back_populates="deliveries", lazy="raise_on_sql"
+    courier: Mapped["User"] = relationship(
+        "User", back_populates="deliveries", lazy="raise_on_sql"
     )
+
     branch: Mapped["Branches"] = relationship(
         "Branches", back_populates="deliveries", lazy="raise_on_sql"
     )
@@ -368,26 +381,6 @@ class Delivery(BaseModel):
         return f"<Delivery(id={self.id}, order_id={self.order_id}, courier_id={self.courier_id}, branch_id={self.branch_id}, status='{self.status}', delivery_time={self.delivery_time})>"
 
 
-class Courier(BaseModel):
-    __tablename__ = "couriers"
-    # TODO: remove
-
-    branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
-    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    phone: Mapped[str] = mapped_column(String(20), nullable=False)
-    vehicle_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-
-    deliveries: Mapped[list["Delivery"]] = relationship(
-        "Delivery", back_populates="courier", lazy="raise_on_sql"
-    )
-    branch: Mapped["Branches"] = relationship(
-        "Branches", back_populates="couriers", lazy="raise_on_sql"
-    )
-
-    def __repr__(self):
-        return f"<Courier(id={self.id}, branch_id={self.branch_id}, first_name='{self.first_name}', last_name='{self.last_name}', phone='{self.phone}', vehicle_type='{self.vehicle_type}', is_active={self.is_active})>"
 
 
 class Image(BaseModel):
@@ -416,25 +409,21 @@ class Discount(BaseModel):
     end_date: Mapped[datetime] = mapped_column(DateTime)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    discount_items: Mapped[list["DiscountItem"]] = relationship(
-        "DiscountItem", back_populates="discount", lazy="raise_on_sql"
+    product: Mapped[list["Product"]] = relationship(
+        "Product", back_populates="discount", lazy="raise_on_sql"
     )
+
 
     def __repr__(self):
         return f"<name {self.name}>"
 
 
-class DiscountItem(Base):
-    __tablename__ = "discount_items"
-    # TODO: remove
+# class RefreshToken(BaseModel):
+#     __tablename__="refresh_tokens"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    discount_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("discounts.id"))
-    product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("products.id"))
+#     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
+#     token: Mapped[str] = mapped_column(String, nullable=False)
 
-    discount: Mapped["Discount"] = relationship(
-        "Discount", back_populates="discount_items", lazy="raise_on_sql"
-    )
-    product: Mapped["Product"] = relationship(
-        "Product", back_populates="discount_items", lazy="raise_on_sql"
-    )
+#     user: Mapped["User"] = relationship(
+#         "User", back_populates="refresh_tokens", lazy="raise_on_sql"
+#     )

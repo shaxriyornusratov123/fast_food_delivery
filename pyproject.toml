@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.18.4",
     "fastapi[standard]>=0.128.4",
+    "geopy>=2.4.1",
     "jose>=1.0.0",
     "passlib[argon2]>=1.7.4",
     "psycopg2-binary>=2.9.11",
