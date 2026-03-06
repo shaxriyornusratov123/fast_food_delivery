@@ -8,7 +8,6 @@ from app.models import (
     Promocodes,
     Discount,
     Image,
-    Courier,
     Delivery,
     Branches,
     Like,
@@ -54,7 +53,6 @@ admin.add_view(PromocodeAdminView(Promocodes, icon="fa fa-tag"))
 admin.add_view(NotificationAdminView(Notification, icon="fa fa-bell"))
 admin.add_view(LikeAdminView(Like, icon="fa fa-heart"))
 admin.add_view(ImageAdminView(Image, icon="fa fa-image"))
-admin.add_view(CourierAdminView(Courier, icon="fa fa-truck"))
 admin.add_view(BranchAdminView(Branches, icon="fa fa-store"))
 admin.add_view(DiscountAdminView(Discount, icon="fa fa-percent"))
 admin.add_view(DeliveryAdminView(Delivery, icon="fa fa-shipping-fast"))

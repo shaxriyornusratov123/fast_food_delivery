@@ -14,10 +14,20 @@ from app.dependencies import current_user_dep
 router = APIRouter(prefix="/products", tags=["Products"])
 
 
-@router.get("/list/")
-async def get_products(session: db_dep):
-    # TODO: list with search, filter
-    pass
+@router.get("/list/", response_model=list[ProductListResponse])
+async def get_products(session: db_dep, search: str | None = None):
+    stmt = (
+        select(Product).where(Product.name.ilike(f"%{search}%"))
+        if search
+        else select(Product)
+    )
+    res = session.execute(stmt)
+    product = res.scalars().all()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Products not found")
+
+    return product 
 
 
 @router.get("/{product_id}", response_model=ProductListResponse)

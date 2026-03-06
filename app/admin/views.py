@@ -125,7 +125,6 @@ class PromocodeAdminView(ModelView):
     fields = [
         "id",
         "discount_percentage",
-        "discount_price",
         "is_active",
         "created_at",
         "updated_at",

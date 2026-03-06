@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
 from app.database import db_dep
-from app.models import User
+from app.models import User, Cart
 from app.schemas.auth import UserRegisterRequest, UserRegisterResponse
 from app.utils import hash_password, send_email, redis_client
 
@@ -15,7 +15,6 @@ router = APIRouter(prefix="/register", tags=["Auth"])
 
 @router.post("/register", response_model=UserRegisterResponse)
 async def register_user(session: db_dep, data: UserRegisterRequest):
-    # TODO: cart birga create bolsin bitta transactionda
     stmt = select(User).where(User.email == data.email)
     res = session.execute(stmt).scalars().first()
 
@@ -25,6 +24,12 @@ async def register_user(session: db_dep, data: UserRegisterRequest):
     user = User(
         email=data.email, password_hash=hash_password(data.password), is_active=False
     )
+
+    session.add(user)
+    session.flush() 
+
+    cart = Cart(user_id=user.id)
+    session.add(cart) 
 
     secret_code = secrets.token_hex(16)
     send_email(
@@ -40,7 +45,6 @@ async def register_user(session: db_dep, data: UserRegisterRequest):
         user.is_staff = True
         user.is_superuser = True
 
-    session.add(user)
     session.commit()
 
     return JSONResponse(

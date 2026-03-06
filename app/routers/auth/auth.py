@@ -42,7 +42,3 @@ async def refresh(session: db_dep, data: RefreshToken):
     access_token = generate_jwt_token(user_id, is_access_only=True)
 
     return {"access_token": access_token}
-
-@router.get("/me", response_model=UserProfileResponse)
-async def me(current_user: current_user_dep):
-    return current_user

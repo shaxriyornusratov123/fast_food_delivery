@@ -36,5 +36,3 @@ def get_current_user(
 
 
 current_user_dep = Annotated[User, Depends(get_current_user)]
-
-
