@@ -8,6 +8,7 @@ from app.routers import (
     notif_router,
     location_router,
     users_router,
+    promocode_router,
 )
 from app.admin.settings import admin
 
@@ -23,5 +24,6 @@ app.include_router(notif_router)
 app.include_router(product_router)
 app.include_router(order_router)
 app.include_router(location_router)
+app.include_router(promocode_router)
 
 admin.mount_to(app=app)

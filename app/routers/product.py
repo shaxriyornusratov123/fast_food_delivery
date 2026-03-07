@@ -27,7 +27,7 @@ async def get_products(session: db_dep, search: str | None = None):
     if not product:
         raise HTTPException(status_code=404, detail="Products not found")
 
-    return product 
+    return product
 
 
 @router.get("/{product_id}", response_model=ProductListResponse)
@@ -97,11 +97,10 @@ async def update_product(
     return product
 
 
-@router.delete("/{prodduct_id}/")
+@router.delete("/{product_id}/")
 async def delete_product(
     session: db_dep, product_id: int, current_user: current_user_dep
 ):
-    # product o'chmaydi, is_active=False boladi
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="Not authorized to delete product")
 
@@ -112,5 +111,7 @@ async def delete_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    session.delete(product)
+    product.is_active = False
+
     session.commit()
+    session.refresh(product)

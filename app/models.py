@@ -144,7 +144,8 @@ class Product(Base):
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    price: Mapped[float] = mapped_column(Float, nullable=False)
+    price: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=True, default=True)
 
     subcategory: Mapped["Subcategory"] = relationship(
         "Subcategory", back_populates="products", lazy="raise_on_sql"
@@ -205,7 +206,7 @@ class Cart(BaseModel):
     __tablename__ = "carts"
 
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
-    total_price: Mapped[float] = mapped_column(Float, nullable=False)
+    total_price: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped["User"] = relationship(
         "User", back_populates="cart", lazy="raise_on_sql"
@@ -340,8 +341,8 @@ class Promocodes(BaseModel):
 
     code: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     discount_percentage: Mapped[int] = mapped_column(Integer, nullable=False)
-    max_uses: Mapped[int] = mapped_column(BigInteger,nullable=True)
-    used_count: Mapped[int]=mapped_column(BigInteger,default=0)
+    max_uses: Mapped[int] = mapped_column(BigInteger, nullable=True)
+    used_count: Mapped[int] = mapped_column(BigInteger, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     orders: Mapped[list["Order"]] = relationship(

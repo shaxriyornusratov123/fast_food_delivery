@@ -54,8 +54,8 @@ async def update_branch(db: db_dep, request: Branch_update_req):
 @router.delete("/delete", status_code=204)
 async def delete_branch(db: db_dep, request: Branch_delete_req):
     stmt = select(Branches).where(Branches.address == request.address)
-    res = db.select(stmt)
-    brnch = db.scalars(res).first()
+    res = db.execute(stmt)
+    brnch = res.scalars().first()
 
     if not brnch:
         raise HTTPException(status_code=404, detail="Branch not found")

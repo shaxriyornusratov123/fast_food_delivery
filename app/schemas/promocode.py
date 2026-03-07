@@ -2,12 +2,14 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+
 class CreatePromocodeRequest(BaseModel):
     code: str
     discount_percentage: int
     is_active: bool
     max_uses: int
     created_at: datetime
+
 
 class UpdatepromocodeRequest(BaseModel):
     code: str
@@ -16,4 +18,6 @@ class UpdatepromocodeRequest(BaseModel):
     is_active: bool
 
 
-    
+class ApplyPromocodeRequest(BaseModel):
+    code: str
+    price: int

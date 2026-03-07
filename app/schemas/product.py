@@ -7,7 +7,8 @@ class ProductListResponse(BaseModel):
     image_id: int
     name: str
     description: str
-    price: float
+    price: int
+    is_active: bool
 
     model_config = {
         "json_schema_extra": {
@@ -18,6 +19,7 @@ class ProductListResponse(BaseModel):
                     "image_id": 3,
                     "description": "katta mol gushti lavash",
                     "price": 37000,
+                    "is_active": "True",
                 }
             ]
         }
@@ -29,7 +31,7 @@ class ProductCreateRequest(BaseModel):
     image_id: int
     name: str
     description: str
-    price: float
+    price: int
 
 
 class ProductUpdateRequest(BaseModel):
@@ -37,4 +39,5 @@ class ProductUpdateRequest(BaseModel):
     image_id: int
     name: str
     description: str
-    price: float
+    price: int
+    is_active: bool
