@@ -6,6 +6,7 @@ from .notification import router as notif_router
 from .address import router as location_router
 from .users import router as users_router
 from .promocode import router as promocode_router
+from .category import router as subcategory_router
 
 __all__ = [
     "auth_router",
@@ -16,4 +17,5 @@ __all__ = [
     "location_router",
     "users_router",
     "promocode_router",
+    "subcategory_router",
 ]

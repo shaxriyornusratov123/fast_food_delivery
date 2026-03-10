@@ -133,9 +133,7 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    subcategory_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("subcategories.id")
-    )
+    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
     discount_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("discounts.id"), nullable=True
     )
@@ -147,8 +145,8 @@ class Product(Base):
     price: Mapped[int] = mapped_column(BigInteger, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=True, default=True)
 
-    subcategory: Mapped["Subcategory"] = relationship(
-        "Subcategory", back_populates="products", lazy="raise_on_sql"
+    category: Mapped["Category"] = relationship(
+        "Category", back_populates="products", lazy="raise_on_sql"
     )
     image: Mapped["Image"] = relationship(
         "Image", back_populates="product", lazy="raise_on_sql"
@@ -176,30 +174,34 @@ class Category(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    subcategories: Mapped[list["Subcategory"]] = relationship(
-        "Subcategory", back_populates="category", lazy="raise_on_sql"
+    # subcategories: Mapped[list["Subcategory"]] = relationship(
+    #     "Subcategory", back_populates="category", lazy="raise_on_sql"
+    # )
+
+    products: Mapped[list["Product"]] = relationship(
+        "Product", back_populates="category", lazy="raise_on_sql"
     )
 
     def __repr__(self):
         return f"<Category(id={self.id}, name='{self.name}')>"
 
 
-class Subcategory(Base):
-    __tablename__ = "subcategories"
+# class Subcategory(Base):
+#     __tablename__ = "subcategories"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
+#     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+#     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
+#     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    category: Mapped["Category"] = relationship(
-        "Category", back_populates="subcategories", lazy="raise_on_sql"
-    )
-    products: Mapped[list["Product"]] = relationship(
-        "Product", back_populates="subcategory", lazy="raise_on_sql"
-    )
+#     category: Mapped["Category"] = relationship(
+#         "Category", back_populates="subcategories", lazy="raise_on_sql"
+#     )
+#     products: Mapped[list["Product"]] = relationship(
+#         "Product", back_populates="subcategory", lazy="raise_on_sql"
+#     )
 
-    def __repr__(self):
-        return f"<Subcategory(id={self.id}, name='{self.name}')>"
+#     def __repr__(self):
+#         return f"<Subcategory(id={self.id}, name='{self.name}')>"
 
 
 class Cart(BaseModel):

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from fastapi import Form
 
 
 class ProductListResponse(BaseModel):
@@ -27,11 +28,10 @@ class ProductListResponse(BaseModel):
 
 
 class ProductCreateRequest(BaseModel):
-    subcategory_id: int
-    image_id: int
-    name: str
-    description: str
-    price: int
+    category_id: int = Form()
+    name: str = Form()
+    description: str = Form()
+    price: int = Form()
 
 
 class ProductUpdateRequest(BaseModel):

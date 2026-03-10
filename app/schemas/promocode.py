@@ -21,3 +21,12 @@ class UpdatepromocodeRequest(BaseModel):
 class ApplyPromocodeRequest(BaseModel):
     code: str
     price: int
+
+
+class PromocodeListResponse(BaseModel):
+    id: int
+    code: str
+    discount_percentage: int
+    max_uses: int
+    used_count: int
+    is_active: bool

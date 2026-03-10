@@ -45,9 +45,9 @@ async def update_user(
 
 @router.post("/me/deactivate/")
 async def deactivate_user(session: db_dep, current_user: current_user_dep):
-    current_user.is_active=False
+    current_user.is_active = False
 
     session.commit()
     session.refresh(current_user)
 
-    return current_user 
+    return current_user

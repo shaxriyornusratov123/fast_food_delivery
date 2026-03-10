@@ -5,10 +5,22 @@ from sqlalchemy import select
 
 from app.models import Promocodes
 from app.database import db_dep
-from app.schemas.promocode import CreatePromocodeRequest, ApplyPromocodeRequest
+from app.schemas.promocode import (
+    CreatePromocodeRequest,
+    ApplyPromocodeRequest,
+    PromocodeListResponse,
+)
 from app.dependencies import current_user_dep
 
 router = APIRouter(prefix="/promocodes", tags=["Promocodes"])
+
+
+@router.get("/list/", response_model=list[PromocodeListResponse])
+async def get_promocodes(session: db_dep):
+    stmt = select(Promocodes)
+    code = session.execute(stmt).scalars().all()
+
+    return code
 
 
 @router.post("/")
@@ -62,3 +74,24 @@ async def apply_promocode(
     session.commit()
 
     return {"total price": final_price}
+
+
+@router.delete("/delete/{promocode_id}")
+async def delete_promocode(
+    session: db_dep, promocode_id: int, current_user: current_user_dep
+):
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete promocode"
+        )
+
+    stmt = select(Promocodes).where(Promocodes.id == promocode_id)
+    code = session.execute(stmt).scalars().first()
+
+    if not code:
+        raise HTTPException(status_code=404, detail="Code not found")
+
+    code.is_active = False
+
+    session.commit()
+    session.refresh(code)
