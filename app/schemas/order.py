@@ -9,6 +9,10 @@ class OrderItemCreateRequest(BaseModel):
 
 class OrederCreateRequest(BaseModel):
     items: list[OrderItemCreateRequest]
+    address_id: int
+    branch_id: int
+    cart_id: int | None = None
+    promocode: str | None = None
 
 
 class OrderUpdateRequest(BaseModel):
