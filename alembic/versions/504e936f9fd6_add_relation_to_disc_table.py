@@ -1,18 +1,17 @@
-"""beginning
+"""add: relation to disc table
 
-Revision ID: 517bb4656c7d
-Revises: c8ae730e3d4e
-Create Date: 2026-03-01 06:33:03.218090
+Revision ID: 504e936f9fd6
+Revises: b0fa0d473f61
+Create Date: 2026-03-04 15:54:45.682724
 
 """
-
 from typing import Sequence, Union
 
 
 
 # revision identifiers, used by Alembic.
-revision: str = "517bb4656c7d"
-down_revision: Union[str, Sequence[str], None] = "c8ae730e3d4e"
+revision: str = '504e936f9fd6'
+down_revision: Union[str, Sequence[str], None] = 'b0fa0d473f61'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

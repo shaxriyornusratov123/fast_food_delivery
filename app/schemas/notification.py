@@ -1,7 +1,7 @@
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel
 
 
-class Create_Notif_req(BaseSettings):
+class Create_Notif_req(BaseModel):
     name: str | None = None
     title: str | None = None
     message: str | None = None
@@ -9,11 +9,11 @@ class Create_Notif_req(BaseSettings):
     is_send_to_all: bool | None = None
 
 
-class Delete_Notif_req(BaseSettings):
+class Delete_Notif_req(BaseModel):
     title: str
 
 
-class Update_Notif_req(BaseSettings):
+class Update_Notif_req(BaseModel):
     name: str | None = None
     title: str | None = None
     message: str | None = None
