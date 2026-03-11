@@ -3,11 +3,11 @@ from sqlalchemy import select
 from pathlib import Path
 import shutil
 
-from app.dependencies import current_user_dep
+from app.dependencies import current_user_dep,credentials_dep
 from app.schemas import user
 from app.schemas.user import UserProfileResponse, UserUpdateRequest
 from app.database import db_dep
-from app.models import Image
+from app.models import TokenBlancList
 from app.config import settings
 
 router = APIRouter(
@@ -28,13 +28,14 @@ async def update_user(
 
     if not current_user:
         raise HTTPException(status_code=404, detail="User not found")
-    if update_data.email:
+    
+    if update_data.email is not None:
         current_user.email = update_data.email
-    if update_data.first_name:
+    if update_data.first_name is not None:
         current_user.first_name = update_data.first_name
-    if update_data.last_name:
+    if update_data.last_name is not None:
         current_user.last_name = update_data.last_name
-    if update_data.phone:
+    if update_data.phone is not None:
         current_user.phone = update_data.phone
 
     session.commit()
@@ -43,11 +44,33 @@ async def update_user(
     return current_user
 
 
-@router.post("/me/deactivate/")
+@router.post("/me/deactivate/",status_code=200)
 async def deactivate_user(session: db_dep, current_user: current_user_dep):
     current_user.is_active = False
 
-    session.commit()
+    await session.commit()
     session.refresh(current_user)
 
-    return current_user
+    return {"detail": "User deactivated successfully"}
+
+
+@router.post("/logout")
+async def logout(session: db_dep, current_user: current_user_dep,credentials: credentials_dep):
+    token=credentials.credentials
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    stmt=select(TokenBlancList).where(TokenBlancList.token==token)
+    token=session.execute(stmt).scalars().first()
+
+
+    if token:
+        raise HTTPException(status_code=400, detail="Token already invalidated")
+
+
+    blanc_list_token=TokenBlancList(token=token)
+    session.add(blanc_list_token)
+    session.commit()
+
+    return {"detail": "Successfully logged out"}
+

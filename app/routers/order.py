@@ -9,10 +9,15 @@ from app.dependencies import current_user_dep
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
-@router.get("/list/")
-async def get_orders(session: db_dep):
-    # TODO: list with search, filter
-    pass
+
+@router.get("/list")
+async def list_order(session: db_dep, current_user: current_user_dep):
+    stmt = (
+        select(Order).where(Order.user_id == current_user.id).order_by(Order.created_at)
+    )
+    res = session.execute(stmt).scalars().all()
+
+    return res
 
 
 @router.get("/{order_id}", response_model=OrderListResponse)

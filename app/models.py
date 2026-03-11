@@ -174,9 +174,6 @@ class Category(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    # subcategories: Mapped[list["Subcategory"]] = relationship(
-    #     "Subcategory", back_populates="category", lazy="raise_on_sql"
-    # )
 
     products: Mapped[list["Product"]] = relationship(
         "Product", back_populates="category", lazy="raise_on_sql"
@@ -186,22 +183,6 @@ class Category(Base):
         return f"<Category(id={self.id}, name='{self.name}')>"
 
 
-# class Subcategory(Base):
-#     __tablename__ = "subcategories"
-
-#     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-#     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
-#     name: Mapped[str] = mapped_column(String(100), nullable=False)
-
-#     category: Mapped["Category"] = relationship(
-#         "Category", back_populates="subcategories", lazy="raise_on_sql"
-#     )
-#     products: Mapped[list["Product"]] = relationship(
-#         "Product", back_populates="subcategory", lazy="raise_on_sql"
-#     )
-
-#     def __repr__(self):
-#         return f"<Subcategory(id={self.id}, name='{self.name}')>"
 
 
 class Cart(BaseModel):
@@ -416,12 +397,12 @@ class Discount(BaseModel):
         return f"<name {self.name}>"
 
 
-# class RefreshToken(BaseModel):
-#     __tablename__="refresh_tokens"
+class TokenBlancList(Base):
+    __tablename__="token_blanc_list"
 
-#     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
-#     token: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[int]=mapped_column(BigInteger, primary_key=True)
+    token: Mapped[str]=mapped_column(String,unique=True)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-#     user: Mapped["User"] = relationship(
-#         "User", back_populates="refresh_tokens", lazy="raise_on_sql"
-#     )
+    def __repr__(self):
+        return self.token

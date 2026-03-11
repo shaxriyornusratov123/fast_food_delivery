@@ -12,6 +12,8 @@ from app.utils import decode_jwt_token
 
 jwt_security = HTTPBearer(auto_error=False)
 
+credentials_dep=Annotated[HTTPAuthorizationCredentials,Depends(jwt_security)]
+
 
 def get_current_user(
     session: db_dep, credentials: HTTPAuthorizationCredentials = Depends(jwt_security)
