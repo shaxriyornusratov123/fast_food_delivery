@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from fastapi import Form
 
 
 class ProductListResponse(BaseModel):
@@ -7,7 +8,8 @@ class ProductListResponse(BaseModel):
     image_id: int
     name: str
     description: str
-    price: float
+    price: int
+    is_active: bool
 
     model_config = {
         "json_schema_extra": {
@@ -18,6 +20,7 @@ class ProductListResponse(BaseModel):
                     "image_id": 3,
                     "description": "katta mol gushti lavash",
                     "price": 37000,
+                    "is_active": "True",
                 }
             ]
         }
@@ -25,11 +28,10 @@ class ProductListResponse(BaseModel):
 
 
 class ProductCreateRequest(BaseModel):
-    subcategory_id: int
-    image_id: int
-    name: str
-    description: str
-    price: float
+    category_id: int = Form()
+    name: str = Form()
+    description: str = Form()
+    price: int = Form()
 
 
 class ProductUpdateRequest(BaseModel):
@@ -37,4 +39,5 @@ class ProductUpdateRequest(BaseModel):
     image_id: int
     name: str
     description: str
-    price: float
+    price: int
+    is_active: bool

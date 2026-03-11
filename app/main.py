@@ -1,6 +1,16 @@
 from fastapi import FastAPI
 
-from app.routers import auth_router, product_router, order_router,branch_router, notif_router, location_router, cat_router, subcat_router
+from app.routers import (
+    auth_router,
+    product_router,
+    order_router,
+    branch_router,
+    notif_router,
+    location_router,
+    users_router,
+    promocode_router,
+    subcategory_router,
+)
 from app.admin.settings import admin
 
 app = FastAPI(
@@ -9,11 +19,13 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(branch_router)
 app.include_router(notif_router)
 app.include_router(product_router)
 app.include_router(order_router)
 app.include_router(location_router)
-app.include_router(cat_router)
-app.include_router(subcat_router)
+app.include_router(promocode_router)
+app.include_router(subcategory_router)
+
 admin.mount_to(app=app)

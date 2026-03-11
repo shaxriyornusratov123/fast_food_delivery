@@ -47,9 +47,9 @@ class OrderAdminView(ModelView):
 
 
 class ProductAdminView(ModelView):
-    fields = ["id", "subcategory_id", "image_id", "name", "description", "price"]
+    fields = ["id", "category_id", "image_id", "name", "description", "price"]
 
-    exclude_fields_from_list = ["subcategory_id", "image_id", "description"]
+    exclude_fields_from_list = ["category_id", "image_id", "description"]
     exclude_fields_from_create = ["id"]
     exclude_fields_from_edit = ["id"]
 
@@ -71,7 +71,6 @@ class SubcategoryAdminView(ModelView):
 class CartAdminView(ModelView):
     fields = ["id", "user_id", "total_price", "created_at", "updated_at"]
 
-    exclude_fields_from_list = ["user_id"]
     exclude_fields_from_create = ["id", "total_price", "created_at", "updated_at"]
     exclude_fields_from_edit = [
         "id",
@@ -124,8 +123,8 @@ class PaymentAdminView(ModelView):
 class PromocodeAdminView(ModelView):
     fields = [
         "id",
+        "code",
         "discount_percentage",
-        "discount_price",
         "is_active",
         "created_at",
         "updated_at",

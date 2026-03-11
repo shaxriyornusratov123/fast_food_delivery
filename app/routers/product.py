@@ -1,7 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, Form, Depends
 from sqlalchemy import select
+import os
+from pathlib import Path
+import shutil
+from typing import Annotated
 
-from app.models import Product
+from app.models import Product, Image
 from app.database import db_dep
 from app.schemas.product import (
     ProductListResponse,
@@ -9,15 +13,26 @@ from app.schemas.product import (
     ProductUpdateRequest,
 )
 from app.dependencies import current_user_dep
+from app.config import settings
 
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
 
-@router.get("/list/")
-async def get_products(session: db_dep):
-    # TODO: list with search, filter
-    pass
+@router.get("/list/", response_model=list[ProductListResponse])
+async def get_products(session: db_dep, search: str | None = None):
+    stmt = (
+        select(Product).where(Product.name.ilike(f"%{search}%"))
+        if search
+        else select(Product)
+    )
+    res = session.execute(stmt)
+    product = res.scalars().all()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Products not found")
+
+    return product
 
 
 @router.get("/{product_id}", response_model=ProductListResponse)
@@ -34,17 +49,43 @@ async def get_product(session: db_dep, product_id: int):
 
 @router.post("/create")
 async def create_product(
-    session: db_dep, create_data: ProductCreateRequest, current_user: current_user_dep
+    session: db_dep,
+    create_data: Annotated[ProductCreateRequest, Depends()],
+    current_user: current_user_dep,
+    image: UploadFile,
 ):
     if not (current_user.is_staff or current_user.is_superuser):
-        raise HTTPException(status_code=403, detail="Not authorized to create product")
+        raise HTTPException(status_code=403, detail="Not authorized to create product ")
+
+    ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
+    if image.content_type not in ALLOWED_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Only jpg, jpeg, and png are allowed.",
+        )
+
+    if image.size > 1024 * 1024 * 5:
+        raise HTTPException(
+            status_code=400, detail="File size exceeds the limit of 5MB."
+        )
+
+    path = Path(settings.MEDIA_PATH)
+    path.mkdir(exist_ok=True)
+    res = path / image.filename
+    with open(res, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    image_obj = Image(
+        url=f"{settings.MEDIA_PATH}/{image.filename}",
+    )
 
     product = Product(
-        subcategory_id=create_data.subcategory_id,
-        image_id=create_data.image_id,
+        category_id=create_data.category_id,
         name=create_data.name,
+        image_id=image_obj.id,
+        price=create_data.price,
         description=create_data.description,
-        price=create_data.description,
     )
 
     session.add(product)
@@ -87,11 +128,10 @@ async def update_product(
     return product
 
 
-@router.delete("/{prodduct_id}/")
+@router.delete("/{product_id}/")
 async def delete_product(
     session: db_dep, product_id: int, current_user: current_user_dep
 ):
-    # product o'chmaydi, is_active=False boladi
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="Not authorized to delete product")
 
@@ -102,5 +142,7 @@ async def delete_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    session.delete(product)
+    product.is_active = False
+
     session.commit()
+    session.refresh(product)

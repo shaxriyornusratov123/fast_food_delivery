@@ -1,18 +1,20 @@
-"""beginning
+"""add is_active in product
 
-Revision ID: 517bb4656c7d
-Revises: c8ae730e3d4e
-Create Date: 2026-03-01 06:33:03.218090
+Revision ID: e5f096c62945
+Revises: 453388e6cb5c
+Create Date: 2026-03-07 19:43:54.510400
 
 """
 
 from typing import Sequence, Union
 
+from alembic import op
+import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "517bb4656c7d"
-down_revision: Union[str, Sequence[str], None] = "c8ae730e3d4e"
+revision: str = "e5f096c62945"
+down_revision: Union[str, Sequence[str], None] = "453388e6cb5c"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

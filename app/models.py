@@ -69,8 +69,6 @@ class User(BaseModel):
     #     "RefreshToken", back_populates="user", lazy="raise_on_sql"
     # )
 
-    
-
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', phone='{self.phone}')>"
 
@@ -135,9 +133,7 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    subcategory_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("subcategories.id")
-    )
+    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
     discount_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("discounts.id"), nullable=True
     )
@@ -146,10 +142,11 @@ class Product(Base):
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    price: Mapped[float] = mapped_column(Float, nullable=False)
+    price: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=True, default=True)
 
-    subcategory: Mapped["Subcategory"] = relationship(
-        "Subcategory", back_populates="products", lazy="raise_on_sql"
+    category: Mapped["Category"] = relationship(
+        "Category", back_populates="products", lazy="raise_on_sql"
     )
     image: Mapped["Image"] = relationship(
         "Image", back_populates="product", lazy="raise_on_sql"
@@ -177,37 +174,41 @@ class Category(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    subcategories: Mapped[list["Subcategory"]] = relationship(
-        "Subcategory", back_populates="category", lazy="raise_on_sql"
+    # subcategories: Mapped[list["Subcategory"]] = relationship(
+    #     "Subcategory", back_populates="category", lazy="raise_on_sql"
+    # )
+
+    products: Mapped[list["Product"]] = relationship(
+        "Product", back_populates="category", lazy="raise_on_sql"
     )
 
     def __repr__(self):
         return f"<Category(id={self.id}, name='{self.name}')>"
 
 
-class Subcategory(Base):
-    __tablename__ = "subcategories"
+# class Subcategory(Base):
+#     __tablename__ = "subcategories"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
+#     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+#     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("categories.id"))
+#     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    category: Mapped["Category"] = relationship(
-        "Category", back_populates="subcategories", lazy="raise_on_sql"
-    )
-    products: Mapped[list["Product"]] = relationship(
-        "Product", back_populates="subcategory", lazy="raise_on_sql"
-    )
+#     category: Mapped["Category"] = relationship(
+#         "Category", back_populates="subcategories", lazy="raise_on_sql"
+#     )
+#     products: Mapped[list["Product"]] = relationship(
+#         "Product", back_populates="subcategory", lazy="raise_on_sql"
+#     )
 
-    def __repr__(self):
-        return f"<Subcategory(id={self.id}, name='{self.name}')>"
+#     def __repr__(self):
+#         return f"<Subcategory(id={self.id}, name='{self.name}')>"
 
 
 class Cart(BaseModel):
     __tablename__ = "carts"
 
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
-    total_price: Mapped[float] = mapped_column(Float, nullable=False)
+    total_price: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped["User"] = relationship(
         "User", back_populates="cart", lazy="raise_on_sql"
@@ -220,7 +221,7 @@ class Cart(BaseModel):
         return f"<Cart(id={self.id}, user_id={self.user_id}, total_price={self.total_price})>"
 
 
-class CartItem(BaseModel): 
+class CartItem(BaseModel):
     __tablename__ = "cart_items"
 
     cart_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("carts.id"))
@@ -318,7 +319,7 @@ class Like(BaseModel):
 
 class Branches(Base):
     __tablename__ = "branches"
-    
+
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     address: Mapped[str] = mapped_column(String(200), nullable=False)
     working_hours: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -332,7 +333,6 @@ class Branches(Base):
     orders: Mapped[list["Order"]] = relationship(
         "Order", back_populates="branch", lazy="raise_on_sql"
     )
-    
 
     def __repr__(self):
         return f"<Branch(id={self.id}, address='{self.address}', working_hours='{self.working_hours}', branch_phone='{self.branch_phone}')>"
@@ -342,8 +342,9 @@ class Promocodes(BaseModel):
     __tablename__ = "promocodes"
 
     code: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    discount_percentage: Mapped[float] = mapped_column(Float, nullable=False)
-    discount_price: Mapped[float] = mapped_column(Float, nullable=False)
+    discount_percentage: Mapped[int] = mapped_column(Integer, nullable=False)
+    max_uses: Mapped[int] = mapped_column(BigInteger, nullable=True)
+    used_count: Mapped[int] = mapped_column(BigInteger, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     orders: Mapped[list["Order"]] = relationship(
@@ -381,8 +382,6 @@ class Delivery(BaseModel):
         return f"<Delivery(id={self.id}, order_id={self.order_id}, courier_id={self.courier_id}, branch_id={self.branch_id}, status='{self.status}', delivery_time={self.delivery_time})>"
 
 
-
-
 class Image(BaseModel):
     __tablename__ = "images"
 
@@ -412,7 +411,6 @@ class Discount(BaseModel):
     products: Mapped[list["Product"]] = relationship(
         "Product", back_populates="discount", lazy="raise_on_sql"
     )
-
 
     def __repr__(self):
         return f"<name {self.name}>"

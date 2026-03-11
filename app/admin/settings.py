@@ -15,7 +15,6 @@ from app.models import (
     Address,
     Cart,
     Category,
-    Subcategory,
     Order,
 )
 
@@ -24,7 +23,6 @@ from app.admin.views import (
     OrderAdminView,
     ProductAdminView,
     CategoryAdminView,
-    SubcategoryAdminView,
     CartAdminView,
     AddressAdminView,
     PaymentAdminView,
@@ -44,7 +42,7 @@ admin.add_view(UserAdminView(User, icon="fa fa-user"))
 admin.add_view(OrderAdminView(Order, icon="fa fa-receipt"))
 admin.add_view(ProductAdminView(Product, icon="fa fa-utensils"))
 admin.add_view(CategoryAdminView(Category, icon="fa fa-folder"))
-admin.add_view(SubcategoryAdminView(Subcategory, icon="fa fa-folder-open"))
+# admin.add_view(SubcategoryAdminView(Subcategory, icon="fa fa-folder-open"))
 admin.add_view(CartAdminView(Cart, icon="fa fa-shopping-cart"))
 admin.add_view(AddressAdminView(Address, icon="fa fa-location-dot"))
 admin.add_view(PaymentAdminView(Payment, icon="fa fa-money-bill"))

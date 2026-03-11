@@ -1,8 +1,10 @@
-from fastapi import HTTPException, APIRouter
-from app.database import db_dep
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
+
+from app.database import db_dep
 from app.models import Category
-from app.schemas.category import Create_cat, Update_cat, Response_cat, Delete_cat
+from app.schemas.catgory import CategoryCreateRequest
+from app.dependencies import current_user_dep
 
 router = APIRouter(prefix="/category", tags=["Category"] )
 
@@ -12,20 +14,24 @@ async def cats(db:db_dep ):
     res = db.execute(stmt).scalars().all()
     return res
 
+@router.post("/create")
+async def create_category(
+    db : db_dep,
+    create_data: CategoryCreateRequest,
+    current_user: current_user_dep,
+):
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(
+            status_code=403, detail="Not authorized to create a Subcategory"
+        )
 
-@router.post("/Create_category")
-async def create_cat(db:db_dep, create_request:Create_cat ):
-    stmt = select(Category).where(Category.name == create_request.name)
-    
-    if stmt == False :
-        raise HTTPException(status_code=201, detail="category exist") # if i`m not mistaken `
-    new_cat = Category(
-        id = create_request.id,
-        name = create_request.name
-    )
-    db.add(new_cat)
+    categ = Category(name=create_data.name)
+    db.add(categ)
     db.commit()
-    return new_cat
+    db.refresh(categ)
+
+    return categ
+
 
 @router.put("/Update_category")
 async def update_cat(db:db_dep, update_request:Update_cat):
@@ -55,5 +61,3 @@ async def delete_cat(db:db_dep, delete_request:Delete_cat):
     db.delete(categ)
     db.commit()
     return None
-
-    #comment

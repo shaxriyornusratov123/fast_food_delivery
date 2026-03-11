@@ -10,7 +10,7 @@ from app.utils import verify_password, generate_jwt_token, decode_jwt_token
 from app.dependencies import current_user_dep
 from app.schemas.user import UserProfileResponse
 
-router = APIRouter(prefix="/login", tags=["Auth"])
+router = APIRouter(tags=["Auth"])
 
 
 @router.post("/login")
@@ -18,10 +18,10 @@ async def login(session: db_dep, login_data: UserLoginRequest):
     stmt = select(User).where(User.email == login_data.email)
     user = session.execute(stmt).scalars().first()
 
-    if not user:
+    if not user or not user.is_active:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if not verify_password:
+    if not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid password")
 
     access_token, refresh_token = generate_jwt_token(user.id)
@@ -42,7 +42,3 @@ async def refresh(session: db_dep, data: RefreshToken):
     access_token = generate_jwt_token(user_id, is_access_only=True)
 
     return {"access_token": access_token}
-
-@router.get("/me", response_model=UserProfileResponse)
-async def me(current_user: current_user_dep):
-    return current_user

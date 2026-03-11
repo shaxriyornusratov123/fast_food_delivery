@@ -2,12 +2,17 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
+class OrderItemCreateRequest(BaseModel):
+    product_id: int
+    quantity: int
+
+
 class OrederCreateRequest(BaseModel):
-    user_id: int
+    items: list[OrderItemCreateRequest]
     address_id: int
-    promocode_id: int
     branch_id: int
-    total_price: float
+    cart_id: int | None = None
+    promocode: str | None = None
 
 
 class OrderUpdateRequest(BaseModel):
