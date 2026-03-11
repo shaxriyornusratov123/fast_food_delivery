@@ -8,8 +8,8 @@ from app.dependencies import current_user_dep
 
 router = APIRouter(prefix="/category", tags=["Category"] )
 
-@router.get("/Categories", response_model= Response_category)
-async def cats(db:db_dep ):
+@router.get("/Categories")
+async def cats(db:db_dep):
     stmt = select(Category).order_by(Category.name)
     res = db.execute(stmt).scalars().all()
     return res

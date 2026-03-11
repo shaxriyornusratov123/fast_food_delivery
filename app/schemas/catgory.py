@@ -1,16 +1,15 @@
-from pydantic_settings import  BaseSettings
 from pydantic import BaseModel
 
 class CategoryCreateRequest(BaseModel):
     name: str
 
-class Update_category(BaseSettings):
+class Update_category(BaseModel):
     id: int | None = None
     name: str | None = None
 
-class Response_category(BaseSettings):
-    id : int
-    name : str
+class Response_category(BaseModel):
+    id : int | None = None
+    name : str | None = None
 
-class Delete_category(BaseSettings):
+class Delete_category(BaseModel):
     name: str
