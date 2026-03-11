@@ -2,7 +2,6 @@ from pydantic_settings import BaseSettings
 
 
 class Branch_create_req(BaseSettings):
-    name: str
     address: str
     working_hours: str
     phone: str
