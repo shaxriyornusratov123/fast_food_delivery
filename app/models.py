@@ -409,7 +409,7 @@ class Discount(BaseModel):
     end_date: Mapped[datetime] = mapped_column(DateTime)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    product: Mapped[list["Product"]] = relationship(
+    products: Mapped[list["Product"]] = relationship(
         "Product", back_populates="discount", lazy="raise_on_sql"
     )
 

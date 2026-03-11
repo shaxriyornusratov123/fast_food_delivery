@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     SESSION_ID_EXPIRE_DAYS: int = 1
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    SECRET_KEY: str = "zxcvbnm1234567890!@#$%^&*()"
+    SECRET_KEY: str 
 
     DB_USER: str
     DB_PASSWORD: str

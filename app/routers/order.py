@@ -6,7 +6,7 @@ from app.database import db_dep
 from app.schemas.order import OrderListResponse, OrederCreateRequest
 from app.dependencies import current_user_dep
 
-router = APIRouter(prefix="/orders", tags=["/Orders"])
+router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
 @router.get("/list/")
