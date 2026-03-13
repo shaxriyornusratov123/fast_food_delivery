@@ -7,6 +7,7 @@ from .address import router as location_router
 from .users import router as users_router
 from .promocode import router as promocode_router
 from .category import router as subcategory_router
+from .payment import router as payment_router
 
 __all__ = [
     "auth_router",
@@ -18,4 +19,5 @@ __all__ = [
     "users_router",
     "promocode_router",
     "subcategory_router",
+    "payment_router"
 ]
