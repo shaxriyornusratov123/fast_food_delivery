@@ -24,6 +24,8 @@ async def create_branch(db: db_dep, request: Branch_create_req):
         address=request.address,
         working_hours=request.working_hours,
         branch_phone=request.phone,
+        latitude=request.latitude,
+        longitude=request.longitude,
     )
 
     db.add(branch)

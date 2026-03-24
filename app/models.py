@@ -174,15 +174,12 @@ class Category(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-
     products: Mapped[list["Product"]] = relationship(
         "Product", back_populates="category", lazy="raise_on_sql"
     )
 
     def __repr__(self):
         return f"<Category(id={self.id}, name='{self.name}')>"
-
-
 
 
 class Cart(BaseModel):
@@ -341,7 +338,6 @@ class Delivery(BaseModel):
 
     order_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("orders.id"))
     courier_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
-    # courier userga FK boladi, userda role field boladi: oddiy, courier | is_courier
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
     status: Mapped[str] = mapped_column(String(20), nullable=False)
     delivery_time: Mapped[datetime] = mapped_column(
@@ -354,7 +350,6 @@ class Delivery(BaseModel):
     courier: Mapped["User"] = relationship(
         "User", back_populates="deliveries", lazy="raise_on_sql"
     )
-
     branch: Mapped["Branches"] = relationship(
         "Branches", back_populates="deliveries", lazy="raise_on_sql"
     )
@@ -398,10 +393,10 @@ class Discount(BaseModel):
 
 
 class TokenBlancList(Base):
-    __tablename__="token_blanc_list"
+    __tablename__ = "token_blanc_list"
 
-    id: Mapped[int]=mapped_column(BigInteger, primary_key=True)
-    token: Mapped[str]=mapped_column(String,unique=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    token: Mapped[str] = mapped_column(String, unique=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     def __repr__(self):

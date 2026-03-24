@@ -6,6 +6,8 @@ class Branch_create_req(BaseSettings):
     address: str
     working_hours: str
     phone: str
+    latitude: float
+    longitude: float
 
 
 class Branch_update_req(BaseSettings):

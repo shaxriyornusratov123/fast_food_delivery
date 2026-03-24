@@ -3,7 +3,7 @@ from sqlalchemy import select
 from pathlib import Path
 import shutil
 
-from app.dependencies import current_user_dep,credentials_dep
+from app.dependencies import current_user_dep, credentials_dep
 from app.schemas import user
 from app.schemas.user import UserProfileResponse, UserUpdateRequest
 from app.database import db_dep
@@ -28,7 +28,7 @@ async def update_user(
 
     if not current_user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     if update_data.email is not None:
         current_user.email = update_data.email
     if update_data.first_name is not None:
@@ -44,7 +44,7 @@ async def update_user(
     return current_user
 
 
-@router.post("/me/deactivate/",status_code=200)
+@router.post("/me/deactivate/", status_code=200)
 async def deactivate_user(session: db_dep, current_user: current_user_dep):
     current_user.is_active = False
 
@@ -55,22 +55,21 @@ async def deactivate_user(session: db_dep, current_user: current_user_dep):
 
 
 @router.post("/logout")
-async def logout(session: db_dep, current_user: current_user_dep,credentials: credentials_dep):
-    token=credentials.credentials
+async def logout(
+    session: db_dep, current_user: current_user_dep, credentials: credentials_dep
+):
+    token = credentials.credentials
     if not token:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    stmt=select(TokenBlancList).where(TokenBlancList.token==token)
-    token=session.execute(stmt).scalars().first()
 
+    stmt = select(TokenBlancList).where(TokenBlancList.token == token)
+    token = session.execute(stmt).scalars().first()
 
     if token:
         raise HTTPException(status_code=400, detail="Token already invalidated")
 
-
-    blanc_list_token=TokenBlancList(token=token)
+    blanc_list_token = TokenBlancList(token=token)
     session.add(blanc_list_token)
     session.commit()
 
     return {"detail": "Successfully logged out"}
-

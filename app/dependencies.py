@@ -12,7 +12,7 @@ from app.utils import decode_jwt_token
 
 jwt_security = HTTPBearer(auto_error=False)
 
-credentials_dep=Annotated[HTTPAuthorizationCredentials,Depends(jwt_security)]
+credentials_dep = Annotated[HTTPAuthorizationCredentials, Depends(jwt_security)]
 
 
 def get_current_user(

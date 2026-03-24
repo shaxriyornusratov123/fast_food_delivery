@@ -10,7 +10,9 @@ from app.routers import (
     users_router,
     promocode_router,
     subcategory_router,
-    payment_router
+    payment_router,
+    delivery_router,
+    discount_router,
 )
 from app.admin.settings import admin
 
@@ -29,5 +31,7 @@ app.include_router(location_router)
 app.include_router(promocode_router)
 app.include_router(subcategory_router)
 app.include_router(payment_router)
+app.include_router(delivery_router)
+app.include_router(discount_router)
 
 admin.mount_to(app=app)
