@@ -75,3 +75,21 @@ def send_email(to_email: str, subject: str, body: str):
 
 
 redis_client = redis.from_url(settings.REDIS_URL)
+
+
+def calculate_discounted_price(price: int, discount) -> int:
+    if not discount or not discount.is_active:
+        return price
+
+    now = datetime.utcnow()
+    if not (discount.start_date <= now <= discount.end_date):
+        return price
+
+    if discount.discount_type == "percentage":
+        discounted = price * (1 - discount.value / 100)
+    elif discount.discount_type == "fixed":
+        discounted = price - discount.value
+    else:
+        return price
+
+    return max(0, int(discounted))

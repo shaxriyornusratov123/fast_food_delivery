@@ -1,69 +1,75 @@
-from fastapi import HTTPException, APIRouter
+from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
+from sqlalchemy.orm import Session
 from sqlalchemy import select
+from typing import List
 
 from app.database import db_dep
-from app.models import Notification
-from app.schemas.notification import (
-    Create_Notif_req,
-    Delete_Notif_req,
-    Update_Notif_req,
-)
+from app.models import Notification, User
+from app.schemas.notification import NotificationCreateRequest, NotificationReadResponse
+from app.utils import send_email
 
+router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
-router = APIRouter(prefix="/notif", tags=["Notification"])
+@router.post("/",status_code=201,  response_model=None)
+def create_notification(
+    create_data: NotificationCreateRequest,
+    session: db_dep,
+    background_tasks: BackgroundTasks
+):
+    if create_data.is_sent_to_all:
+        # send notification to all users
+        stmt = select(User)
+        users = session.execute(stmt).scalars().all()
+        for user in users:
+            n = Notification(
+                user_id=user.id,
+                title=create_data.title,
+                message=create_data.message,
+                image_id=create_data.image_id,
+                is_sent_to_all=True
+            )
+            session.add(n)
+            background_tasks.add_task(send_email, user.email, create_data.title, create_data.message)
+        session.commit()
+        return {"status": "success", "message": "Notification sent to all users"}
 
+    else:
+        if not create_data.user_id:
+            raise HTTPException(status_code=400, detail="user_id required")
+        
+        user = session.execute(select(User).where(User.id == create_data.user_id)).scalars().first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-@router.get("/get")
-async def get_notif(db: db_dep):
-    stmt = select(Notification).order_by(Notification.title)
-    res = db.execute(stmt)
-    notif = res.scalars().all()
+        n = Notification(
+            user_id=user.id,
+            title=create_data.title,
+            message=create_data.message,
+            image_id=create_data.image_id
+        )
+        session.add(n)
+        session.commit()
+        session.refresh(n)
 
-    return notif
+        # async send email
+        background_tasks.add_task(send_email, user.email, create_data.title, create_data.message)
 
+        return n
 
-@router.post("/create")
-async def create_notif(db: db_dep, request: Create_Notif_req):
-    notif = Notification(
-        title=request.title,
-        message=request.message,
-        is_read=request.is_read,
-        is_sent_to_all=request.is_send_to_all,
-    )
+# ── GET USER NOTIFICATIONS ─────────────────────────────
+@router.get("/user/{user_id}", response_model=List[NotificationReadResponse])
+def get_user_notifications(user_id: int, session: db_dep):
+    stmt = select(Notification).where(Notification.user_id == user_id)
+    notifications = session.execute(stmt).scalars().all()
+    return notifications
 
-    db.add(notif)
-    db.commit()
-
-    return notif
-
-
-@router.patch("/update")
-async def update_notif(db: db_dep, request: Update_Notif_req):
-    stmt = select(Notification).where(Notification.name == request.name)
-    res = db.execute(stmt)
-    notif = res.scalars().first()
-
-    if not notif:
-        raise HTTPException(status_code=404, detail="Notification nt found")
-
-    notif = Notification(
-        name=request.name, title=request.title, message=request.message
-    )
-
-    db.refresh(notif)
-    db.commit()
-    return notif
-
-
-@router.delete("/delete")
-async def delete_notif(db: db_dep, request: Delete_Notif_req):
-    stmt = select(Notification).where(Notification.title == request.title)
-    res = db.execute(stmt)
-    notif = res.scalars().first()
-
-    if not notif:
+# ── MARK NOTIFICATION AS READ ─────────────────────────
+@router.put("/{notification_id}/read", response_model=NotificationReadResponse)
+def mark_notification_read(notification_id: int, session:db_dep):
+    notification = session.execute(select(Notification).where(Notification.id == notification_id)).scalars().first()
+    if not notification:
         raise HTTPException(status_code=404, detail="Notification not found")
-
-    db.delete(notif)
-    db.commit()
-    return None
+    notification.is_read = True
+    session.commit()
+    session.refresh(notification)
+    return notification

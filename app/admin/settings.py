@@ -30,7 +30,6 @@ from app.admin.views import (
     NotificationAdminView,
     LikeAdminView,
     ImageAdminView,
-    CourierAdminView,
     BranchAdminView,
     DiscountAdminView,
     DeliveryAdminView,

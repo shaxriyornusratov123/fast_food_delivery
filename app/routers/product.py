@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException, UploadFile, Form, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, Depends
 from sqlalchemy import select
-import os
 from pathlib import Path
 import shutil
 from typing import Annotated
@@ -11,6 +10,7 @@ from app.schemas.product import (
     ProductListResponse,
     ProductCreateRequest,
     ProductUpdateRequest,
+    ProductCreateResponse,
 )
 from app.dependencies import current_user_dep
 from app.config import settings
@@ -47,7 +47,7 @@ async def get_product(session: db_dep, product_id: int):
     return product
 
 
-@router.post("/create")
+@router.post("/create", response_model=ProductCreateResponse)
 async def create_product(
     session: db_dep,
     create_data: Annotated[ProductCreateRequest, Depends()],
@@ -73,26 +73,37 @@ async def create_product(
     path = Path(settings.MEDIA_PATH)
     path.mkdir(exist_ok=True)
     res = path / image.filename
-    with open(res, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    try:
+        with open(res, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
 
-    image_obj = Image(
-        url=f"{settings.MEDIA_PATH}/{image.filename}",
-    )
+        image_obj = Image(
+            url=f"{settings.MEDIA_PATH}/{image.filename}",
+        )
 
-    product = Product(
-        category_id=create_data.category_id,
-        name=create_data.name,
-        image_id=image_obj.id,
-        price=create_data.price,
-        description=create_data.description,
-    )
+        session.add(image_obj)
+        session.flush()
 
-    session.add(product)
-    session.commit()
-    session.refresh(product)
+        product = Product(
+            category_id=create_data.category_id,
+            discount_id=create_data.discount_id,
+            name=create_data.name,
+            image_id=image_obj.id,
+            price=create_data.price,
+            description=create_data.description,
+        )
 
-    return product
+        session.add(product)
+        session.commit()
+        session.refresh(product)
+
+        return product
+
+    except Exception:
+        if res.exists():
+            res.unlink()
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create product")
 
 
 @router.put("/{product_id}")

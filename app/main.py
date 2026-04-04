@@ -13,6 +13,7 @@ from app.routers import (
     payment_router,
     delivery_router,
     discount_router,
+    cart_router,
 )
 from app.admin.settings import admin
 
@@ -26,6 +27,7 @@ app.include_router(users_router)
 app.include_router(branch_router)
 app.include_router(notif_router)
 app.include_router(product_router)
+app.include_router(cart_router)
 app.include_router(order_router)
 app.include_router(location_router)
 app.include_router(promocode_router)

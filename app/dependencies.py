@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 
 from app.database import db_dep
 from app.models import User

@@ -26,3 +26,24 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_constraint(None, "products", type_="foreignkey")
     op.drop_column("products", "category_id")
+    op.create_table(
+        "subcategories",
+        sa.Column("id", sa.BIGINT(), autoincrement=True, nullable=False),
+        sa.Column("category_id", sa.BIGINT(), autoincrement=False, nullable=False),
+        sa.Column("name", sa.VARCHAR(length=100), autoincrement=False, nullable=False),
+        sa.ForeignKeyConstraint(
+            ["category_id"], ["categories.id"], name="subcategories_category_id_fkey"
+        ),
+        sa.PrimaryKeyConstraint("id", name="subcategories_pkey"),
+    )
+    op.add_column(
+        "products",
+        sa.Column("subcategory_id", sa.BIGINT(), autoincrement=False, nullable=False),
+    )
+    op.create_foreign_key(
+        "products_subcategory_id_fkey",
+        "products",
+        "subcategories",
+        ["subcategory_id"],
+        ["id"],
+    )

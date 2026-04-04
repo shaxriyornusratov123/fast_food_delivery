@@ -8,10 +8,7 @@ class OrderItemCreateRequest(BaseModel):
 
 
 class OrederCreateRequest(BaseModel):
-    items: list[OrderItemCreateRequest]
-    address_id: int
     branch_id: int
-    cart_id: int | None = None
     promocode: str | None = None
 
 
@@ -47,3 +44,23 @@ class OrderListResponse(BaseModel):
             ]
         }
     }
+
+
+from pydantic import BaseModel
+
+
+class OrderItemResponse(BaseModel):
+    id: int
+    product_id: int
+    quantity: int
+    price: float
+
+
+class OrderCreateResponse(BaseModel):
+    id: int
+    user_id: int
+    address_id: int
+    branch_id: int
+    promocode_id: int | None
+    total_price: float
+    order_items: list[OrderItemResponse]

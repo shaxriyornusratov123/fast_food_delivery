@@ -302,7 +302,7 @@ class Branches(Base):
     address: Mapped[str] = mapped_column(String(200), nullable=False)
     working_hours: Mapped[str] = mapped_column(String(100), nullable=False)
     branch_phone: Mapped[str] = mapped_column(String(20), nullable=False)
-    lattitude: Mapped[float] = mapped_column(Float, nullable=True)
+    latitude: Mapped[float] = mapped_column(Float, nullable=True)
     longitude: Mapped[float] = mapped_column(Float, nullable=True)
 
     deliveries: Mapped[list["Delivery"]] = relationship(

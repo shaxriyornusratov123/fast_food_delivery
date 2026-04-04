@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 
-from app.models import User, Order, Delivery
+from app.models import Delivery
 from app.schemas.delivery import DeliveryCreateRequest, DeliveryCreateResponse
 from app.database import db_dep
 

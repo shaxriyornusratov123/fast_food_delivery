@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from app.database import db_dep
-from app.models import Payment, Order, User
+from app.models import Payment, Order
 from app.dependencies import current_user_dep
 from app.schemas.payment import PaymentCreateRequest, PaymentCreateResponse
 

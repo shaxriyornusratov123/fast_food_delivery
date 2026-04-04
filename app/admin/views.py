@@ -9,6 +9,7 @@ class UserAdminView(ModelView):
         "first_name",
         "last_name",
         "is_active",
+        "is_courier",
         "is_staff",
         "is_superuser",
         "deleted_email",

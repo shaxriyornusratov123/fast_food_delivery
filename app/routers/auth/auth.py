@@ -7,8 +7,6 @@ from app.database import db_dep
 from app.models import User
 from app.schemas.auth import UserLoginRequest, RefreshToken
 from app.utils import verify_password, generate_jwt_token, decode_jwt_token
-from app.dependencies import current_user_dep
-from app.schemas.user import UserProfileResponse
 
 router = APIRouter(tags=["Auth"])
 

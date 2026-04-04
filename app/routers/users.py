@@ -1,14 +1,10 @@
-from fastapi import APIRouter, HTTPException, Form, UploadFile, File
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
-from pathlib import Path
-import shutil
 
 from app.dependencies import current_user_dep, credentials_dep
-from app.schemas import user
 from app.schemas.user import UserProfileResponse, UserUpdateRequest
 from app.database import db_dep
 from app.models import TokenBlancList
-from app.config import settings
 
 router = APIRouter(
     prefix="/users",
