@@ -6,8 +6,10 @@ class UserProfileResponse(BaseModel):
     email: EmailStr
     first_name: str | None = None
     last_name: str | None = None
+    phone: str | None = None
     is_active: bool
     is_staff: bool
+    is_courier: bool
     is_superuser: bool
     is_deleted: bool
 

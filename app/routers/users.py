@@ -44,7 +44,7 @@ async def update_user(
 async def deactivate_user(session: db_dep, current_user: current_user_dep):
     current_user.is_active = False
 
-    await session.commit()
+    session.commit()
     session.refresh(current_user)
 
     return {"detail": "User deactivated successfully"}

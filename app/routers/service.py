@@ -2,10 +2,9 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import select
 from fastapi import HTTPException, status
 
-from app.models import Cart, CartItem, Product,User,Notification
+from app.models import Cart, CartItem, Product
 from app.schemas.cart import AddToCartRequest, UpdateCartItemRequest
 from app.database import db_dep
-from app.schemas.notification import NotificationCreateRequest
 
 
 async def load_cart(session: db_dep, cart_id: int) -> Cart:

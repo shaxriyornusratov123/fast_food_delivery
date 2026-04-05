@@ -25,4 +25,4 @@ async def create_delivery(session: db_dep, create_data: DeliveryCreateRequest):
     session.commit()
     session.refresh(delivery)
 
-    return {"message": "buyurtmagiz 40 daqiqada yetkazib beriladi"}
+    return {"message": "buyurtmagiz 40 daqiqada yetkazib beriladi"} 

@@ -4,6 +4,7 @@ from sqlalchemy import select
 from app.database import db_dep
 from app.schemas.branches import Branch_create_req, Branch_update_req, Branch_delete_req
 from app.models import Branches
+from app.dependencies import current_user_dep
 
 router = APIRouter(prefix="/branches", tags=["Branches"])
 
@@ -17,7 +18,10 @@ async def get_branch(db: db_dep):
 
 
 @router.post("/create")
-async def create_branch(db: db_dep, request: Branch_create_req):
+async def create_branch(db: db_dep, current_user: current_user_dep, request: Branch_create_req):
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(status_code=403, detail="you are not allowed to create branch")
+    
     branch = Branches(
         address=request.address,
         working_hours=request.working_hours,
@@ -32,7 +36,10 @@ async def create_branch(db: db_dep, request: Branch_create_req):
 
 
 @router.patch("/update")
-async def update_branch(db: db_dep, request: Branch_update_req):
+async def update_branch(db: db_dep, current_user: current_user_dep,request: Branch_update_req):
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(status_code=403, detail="you are not allowed to update branch")
+    
     stmt = select(Branches).where(Branches.id == request.id)
     res = db.execute(stmt)
     brnch = res.scalars().first()
@@ -52,7 +59,10 @@ async def update_branch(db: db_dep, request: Branch_update_req):
 
 
 @router.delete("/delete", status_code=204)
-async def delete_branch(db: db_dep, request: Branch_delete_req):
+async def delete_branch(db: db_dep, current_user: current_user_dep, request: Branch_delete_req):
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(status_code=403, detail="you are not allowed to delete branch")
+    
     stmt = select(Branches).where(Branches.address == request.address)
     res = db.execute(stmt)
     brnch = res.scalars().first()
