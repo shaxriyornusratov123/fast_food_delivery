@@ -122,15 +122,15 @@ async def update_product(
 
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    if update_data.subcategory_id:
-        product.subcategory_id = update_data.subcategory_id
+    if update_data.category_id:
+        product.category_id = update_data.category_id
     if update_data.image_id:
         product.image_id = update_data.image_id
-    if product.name:
+    if update_data.product.name:
         product.name = update_data.name
-    if product.description:
+    if update_data.product.description:
         product.description = update_data.description
-    if product.price:
+    if update_data.product.price:
         product.price = update_data.price
 
     session.commit()

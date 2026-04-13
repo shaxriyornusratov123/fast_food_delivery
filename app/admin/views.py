@@ -31,6 +31,7 @@ class OrderAdminView(ModelView):
         "address_id",
         "promocode_id",
         "branch_id",
+        "status",
         "total_price",
         "created_at",
         "updated_at",

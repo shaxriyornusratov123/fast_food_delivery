@@ -3,15 +3,16 @@ from enum import StrEnum
 
 
 class DeliveryStatus(StrEnum):
-    TAYYORLANMOQDA = "tayyorlanmoqda"
-    YETKAZIB_BERILMOQDA = "yetkazib berilmoqda"
-    YETKAZIB_BERILDI = "yetkaziib berildi"
+    PENDING="pending",
+    ASSIGNDE="assigned",
+    DELIVERING="delivering",
+    DELIVERED="delivered"
+    
 
 
-class DeliveryCreateRequest(BaseModel):
+class DeliveryUpdateRequest(BaseModel):
     order_id: int
-    courier_id: int
-    branch_id: int
+    courier_id: int 
     status: DeliveryStatus
 
 
@@ -21,3 +22,5 @@ class DeliveryCreateResponse(BaseModel):
     courier_id: int
     branch_id: int
     status: str
+
+

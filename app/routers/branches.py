@@ -58,17 +58,18 @@ async def update_branch(db: db_dep, current_user: current_user_dep,request: Bran
     return brnch
 
 
-@router.delete("/delete", status_code=204)
-async def delete_branch(db: db_dep, current_user: current_user_dep, request: Branch_delete_req):
+@router.delete("/delete/{branch_id}", status_code=204)
+async def delete_branch(db: db_dep, current_user: current_user_dep, branch_id: int):
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="you are not allowed to delete branch")
     
-    stmt = select(Branches).where(Branches.address == request.address)
+    stmt = select(Branches).where(Branches.id == branch_id)
     res = db.execute(stmt)
     brnch = res.scalars().first()
 
     if not brnch:
         raise HTTPException(status_code=404, detail="Branch not found")
+    
 
     db.delete(brnch)
     db.commit()

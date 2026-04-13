@@ -1,11 +1,12 @@
+import asyncio
+from sqlalchemy import select
 from fastapi import HTTPException, APIRouter
 from geopy.geocoders import Nominatim
-import asyncio
 
 from app.database import db_dep
 from app.models import Address
 from app.dependencies import current_user_dep
-from app.schemas.address import AddressCreateRequest, AddressCreatResponse
+from app.schemas.address import AddressCreateRequest, AddressCreatResponse,AddressUpdateRequest
 
 router = APIRouter(prefix="/address", tags=["Address"])
 
@@ -50,3 +51,28 @@ async def create_address(
     session.commit()
     session.refresh(address)
     return address
+
+
+@router.put("update/{address_id}")
+async def update_address(session: db_dep, address_id: int, current_user: current_user_dep, update_data: AddressUpdateRequest):
+    
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(status_code=403, detail="Not authorized to update category")
+    
+
+    stmt=select(Address).where(Address.id==address_id)
+    address=session.execute(stmt).scalars().all()
+
+    if update_data.location_name:
+        location_name= update_data.location_name
+    if update_data.latitude:
+        latitude=update_data.latitude
+    if update_data.longitude:
+        longitude=update_data.longitude
+
+    session.commit()
+    session.refresh(address)
+
+    return address 
+
+    

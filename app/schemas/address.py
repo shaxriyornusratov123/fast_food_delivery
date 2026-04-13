@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class AddressCreateRequest(BaseModel):
+    location_name: str
     latitude: float
     longitude: float
 
@@ -12,3 +13,8 @@ class AddressCreatResponse(BaseModel):
     location_name: str
     latitude: float
     longitude: float
+
+class AddressUpdateRequest(BaseModel):
+    location_name: str | None = None 
+    latitude: float | None = None 
+    longitude: float | None = None 

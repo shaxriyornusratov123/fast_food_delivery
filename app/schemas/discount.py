@@ -20,3 +20,12 @@ class DiscountCreateResponse(BaseModel):
     end_date: datetime
     is_active: bool
     created_at: datetime
+
+
+class DiscountUpdateRequest(BaseModel):
+    name: str | None = None
+    discout_type: str | None =None
+    value: str | None = None
+    start_date: datetime | None = None 
+    end_date: datetime | None = None 
+    is_active: bool | None = None 

@@ -82,6 +82,7 @@ class Order(BaseModel):
         BigInteger, ForeignKey("promocodes.id"), nullable=True
     )
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
+    status: Mapped[str]=mapped_column(String(50),default="created")
     total_price: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped["User"] = relationship(
