@@ -12,8 +12,11 @@ celery = Celery(
 )
 
 
-@celery.task(name="send_email_celery")
-def send_email_celery(to_email: str, subject: str, body: str):
-    send_email(to_email=to_email, subject=subject, body=body)
+@celery.task(bind=True, name="send_email_celery")
+def send_email_celery(self, to_email: str, subject: str, body: str):
+    try:
+        send_email(to_email=to_email, subject=subject, body=body)
+        return True
+    except Exception as e:
+        raise self.retry(e=e)
 
-    return True

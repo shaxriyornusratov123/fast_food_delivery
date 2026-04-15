@@ -11,6 +11,7 @@ dependencies = [
     "desktop-notifier>=6.2.0",
     "fastapi-mail>=1.6.2",
     "fastapi[standard]>=0.128.4",
+    "flower>=2.0.1",
     "geopy>=2.4.1",
     "jose>=1.0.0",
     "passlib[argon2]>=1.7.4",

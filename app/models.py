@@ -10,12 +10,13 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     func,
+    Enum as SqlEnum
 )
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-
+from app.schemas.delivery import OrderStatus
 
 class BaseModel(Base):
     __abstract__ = True
@@ -82,7 +83,7 @@ class Order(BaseModel):
         BigInteger, ForeignKey("promocodes.id"), nullable=True
     )
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
-    status: Mapped[str]=mapped_column(String(50),default="created")
+    status: Mapped[str] = mapped_column(String(50), default="created")   
     total_price: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped["User"] = relationship(

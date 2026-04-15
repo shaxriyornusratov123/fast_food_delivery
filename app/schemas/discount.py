@@ -24,8 +24,8 @@ class DiscountCreateResponse(BaseModel):
 
 class DiscountUpdateRequest(BaseModel):
     name: str | None = None
-    discout_type: str | None =None
+    discout_type: str | None = None
     value: str | None = None
-    start_date: datetime | None = None 
-    end_date: datetime | None = None 
-    is_active: bool | None = None 
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    is_active: bool | None = None

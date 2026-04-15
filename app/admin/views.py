@@ -51,7 +51,7 @@ class OrderAdminView(ModelView):
 class ProductAdminView(ModelView):
     fields = ["id", "category_id", "image_id", "name", "description", "price"]
 
-    exclude_fields_from_list = ["category_id", "image_id", "description"]
+    exclude_fields_from_list = [ "description"]
     exclude_fields_from_create = ["id"]
     exclude_fields_from_edit = ["id"]
 

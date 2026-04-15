@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status,HTTPException
+from fastapi import APIRouter, status, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -10,9 +10,10 @@ from app.schemas.cart import (
     CartResponse,
     UpdateCartItemRequest,
 )
-from app.models import Cart, CartItem,Product
+from app.models import Cart, CartItem, Product
 
 router = APIRouter(prefix="/cart", tags=["Cart"])
+
 
 @router.post(
     "/items", response_model=AddToCartResponse, status_code=status.HTTP_201_CREATED
@@ -31,7 +32,11 @@ async def add_products_to_cart(
             detail="Product not found",
         )
 
-    cart_stmt = select(Cart).options(selectinload(Cart.cart_items).selectinload(CartItem.product)).where(Cart.user_id == current_user.id)
+    cart_stmt = (
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.product))
+        .where(Cart.user_id == current_user.id)
+    )
     cart = session.execute(cart_stmt).scalars().first()
 
     if not cart:
@@ -46,7 +51,7 @@ async def add_products_to_cart(
     existing = session.execute(stmt).scalars().first()
 
     if existing:
-        new_qty =  create_data.quantity
+        new_qty = create_data.quantity
         if new_qty > 99:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -71,26 +76,28 @@ async def add_products_to_cart(
     return AddToCartResponse(
         message="Product added to cart successfully",
         cart_item_id=cart_item.id,
-        cart=cart
+        cart=cart,
     )
+
 
 @router.patch("/items/{item_id}", response_model=CartResponse)
 async def update_cart_item(
     update_data: UpdateCartItemRequest,
     session: db_dep,
     current_user: current_user_dep,
-    item_id: int
+    item_id: int,
 ):
-    stmt = select(Cart).options(
-    selectinload(Cart.cart_items).selectinload(CartItem.product)  
-    ).where(Cart.user_id == current_user.id)
+    stmt = (
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.product))
+        .where(Cart.user_id == current_user.id)
+    )
     cart = session.execute(stmt).scalars().first()
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
 
-
     stmt = select(CartItem).where(CartItem.cart_id == cart.id, CartItem.id == item_id)
-    cart_item = session.execute(stmt).scalars().first()  
+    cart_item = session.execute(stmt).scalars().first()
     if not cart_item:
         raise HTTPException(status_code=404, detail="Cart item not found")
 
@@ -110,23 +117,23 @@ async def update_cart_item(
 
 @router.delete("/items/{item_id}", response_model=CartResponse)
 async def remove_cart_item(
-    item_id: int,
-    session: db_dep,
-    current_user: current_user_dep
+    item_id: int, session: db_dep, current_user: current_user_dep
 ):
-    
-    stmt = select(Cart).options(
-    selectinload(Cart.cart_items).selectinload(CartItem.product)  
-    ).where(Cart.user_id == current_user.id)
+
+    stmt = (
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.product))
+        .where(Cart.user_id == current_user.id)
+    )
     cart = session.execute(stmt).scalars().first()
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
 
     stmt = select(CartItem).where(CartItem.cart_id == cart.id, CartItem.id == item_id)
-    cart_item = session.execute(stmt).scalars().first()  
+    cart_item = session.execute(stmt).scalars().first()
     if not cart_item:
         raise HTTPException(status_code=404, detail="Cart item not found")
-    
+
     session.delete(cart_item)
     session.flush()
     cart.total_price = round(
@@ -135,15 +142,17 @@ async def remove_cart_item(
     session.commit()
     return cart
 
-    
+
 @router.delete("", response_model=CartResponse)
 async def clear_cart(
     session: db_dep,
     current_user: current_user_dep,
 ):
-    stmt = select(Cart).options(
-        selectinload(Cart.cart_items).selectinload(CartItem.product)
-    ).where(Cart.user_id == current_user.id)
+    stmt = (
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.product))
+        .where(Cart.user_id == current_user.id)
+    )
     cart = session.execute(stmt).scalars().first()
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
@@ -153,7 +162,7 @@ async def clear_cart(
 
     for item in cart.cart_items:
         session.delete(item)
-    
+
     session.flush()
     cart.total_price = 0
     session.commit()

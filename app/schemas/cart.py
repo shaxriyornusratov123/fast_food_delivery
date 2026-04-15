@@ -16,9 +16,6 @@ class UpdateCartItemRequest(BaseModel):
     quantity: int = Field(..., ge=0, le=99)  # 0 = удалить
 
 
-
-
-
 class ProductBrief(BaseModel):
     id: int
     name: str
@@ -32,8 +29,8 @@ class CartItemResponse(BaseModel):
     id: int
     product: ProductBrief
     quantity: int
-    price: float  
-    subtotal: float = 0.0  
+    price: float
+    subtotal: float = 0.0
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -55,6 +52,6 @@ class CartResponse(BaseModel):
     model_config = {"from_attributes": True, "populate_by_name": True}
 
 
-class AddToCartResponse(BaseModel):                     
+class AddToCartResponse(BaseModel):
     cart_item_id: int
     cart: CartResponse

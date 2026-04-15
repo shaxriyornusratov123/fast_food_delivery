@@ -11,5 +11,6 @@ class CategoryListResponse(BaseModel):
 
     model_config = {"json_schema_extra": {"examples": [{"id": 1, "name": "Lavash"}]}}
 
+
 class CategoryUpdateRequest(BaseModel):
-    name: str 
+    name: str

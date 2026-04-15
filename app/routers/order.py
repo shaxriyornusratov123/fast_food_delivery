@@ -2,7 +2,17 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.models import Order, Product, OrderItem, Promocodes, Cart, CartItem, Address,Delivery,User
+from app.models import (
+    Order,
+    Product,
+    OrderItem,
+    Promocodes,
+    Cart,
+    CartItem,
+    Address,
+    Delivery,
+    User,
+)
 from app.database import db_dep
 from app.schemas.order import (
     OrderListResponse,
@@ -116,21 +126,20 @@ async def create_order(
         order.promocode_id = code.id
 
     order.total_price = total
-    session.commit()
+    session.commit() 
 
-    courier = session.execute(
-        select(User).where(User.is_courier==True)
-    ).scalars().first()
+    courier = (
+        session.execute(select(User).where(User.is_courier == True)).scalars().first()
+    )
 
     if not courier:
         raise HTTPException(status_code=400, detail="No couriers available")
 
-
     delivery = Delivery(
         order_id=order.id,
         branch_id=create_data.branch_id,
-        status="pending",  
-        courier_id=None
+        status="pending",
+        courier_id=None,
     )
     session.add(delivery)
     session.commit()
@@ -148,3 +157,4 @@ async def create_order(
     )
     order = session.execute(order_stmt).scalars().first()
     return order
+

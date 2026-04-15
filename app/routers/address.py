@@ -6,27 +6,27 @@ from geopy.geocoders import Nominatim
 from app.database import db_dep
 from app.models import Address
 from app.dependencies import current_user_dep
-from app.schemas.address import AddressCreateRequest, AddressCreatResponse,AddressUpdateRequest
+from app.schemas.address import (
+    AddressCreateRequest,
+    AddressCreatResponse,
+    AddressUpdateRequest,
+    AddressListResponse
+)
 
 router = APIRouter(prefix="/address", tags=["Address"])
 
 geolocator = Nominatim(user_agent="fast_food")
 
 
-@router.get("/location")
-async def get_location(lat: float, lon: float):
-    location_query = f"{lat}, {lon}"
+@router.get("/location/{address_id}",response_model=AddressListResponse)
+async def get_location(session: db_dep, address_id: int):
+    stmt=select(Address).where(Address.id==address_id)
+    address=session.execute(stmt).scalars().first()
 
-    user_address = geolocator.reverse(location_query, language="uz")
-
-    if not user_address:
-        raise HTTPException(status_code=404, detail="Location not found!")
-
-    return {
-        "location": user_address.address,
-        "address_details": user_address.raw.get("address"),
-    }
-
+    if not address:
+        raise HTTPException(status_code=404, detail="address not found")
+    
+    return address
 
 @router.post("/create", response_model=AddressCreatResponse)
 async def create_address(
@@ -54,25 +54,27 @@ async def create_address(
 
 
 @router.put("update/{address_id}")
-async def update_address(session: db_dep, address_id: int, current_user: current_user_dep, update_data: AddressUpdateRequest):
-    
+async def update_address(
+    session: db_dep,
+    address_id: int,
+    current_user: current_user_dep,
+    update_data: AddressUpdateRequest,
+):
+
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(status_code=403, detail="Not authorized to update category")
-    
 
-    stmt=select(Address).where(Address.id==address_id)
-    address=session.execute(stmt).scalars().all()
+    stmt = select(Address).where(Address.id == address_id)
+    address = session.execute(stmt).scalars().all()
 
     if update_data.location_name:
-        location_name= update_data.location_name
+        location_name = update_data.location_name
     if update_data.latitude:
-        latitude=update_data.latitude
+        latitude = update_data.latitude
     if update_data.longitude:
-        longitude=update_data.longitude
+        longitude = update_data.longitude
 
     session.commit()
     session.refresh(address)
 
-    return address 
-
-    
+    return address

@@ -7,6 +7,7 @@ from app.models import Notification, User
 from app.schemas.notification import NotificationCreateRequest, NotificationReadResponse
 from app.utils import send_email
 from app.dependencies import current_user_dep
+from app.celery import send_email_celery
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
@@ -16,7 +17,6 @@ async def create_notification(
     create_data: NotificationCreateRequest,
     session: db_dep,
     current_user: current_user_dep,
-    background_tasks: BackgroundTasks,
 ):
     if not (current_user.is_staff or current_user.is_superuser):
         raise HTTPException(
@@ -34,8 +34,8 @@ async def create_notification(
                 is_sent_to_all=True,
             )
             session.add(n)
-            background_tasks.add_task(
-                send_email, user.email, create_data.title, create_data.message
+            send_email_celery.delay(
+                user.email, create_data.title, create_data.message
             )
         session.commit()
         return {"status": "success", "message": "Notification sent to all users"}
@@ -62,8 +62,8 @@ async def create_notification(
         session.commit()
         session.refresh(n)
 
-        background_tasks.add_task(
-            send_email, user.email, create_data.title, create_data.message
+        send_email_celery.delay(
+            user.email, create_data.title, create_data.message
         )
         return n
 

@@ -24,7 +24,7 @@ class OrderListResponse(BaseModel):
     id: int
     user_id: int
     address_id: int
-    promocode_id: int
+    promocode_id: int | None = None 
     branch_id: int
     total_price: float
     created_at: datetime

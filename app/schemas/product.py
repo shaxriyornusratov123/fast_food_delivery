@@ -37,10 +37,10 @@ class ProductCreateRequest(BaseModel):
 
 
 class ProductUpdateRequest(BaseModel):
-    category_id: int | None = None 
+    category_id: int | None = None
     image_id: int | None = None
-    name: str | None = None 
-    description: str | None = None 
+    name: str | None = None
+    description: str | None = None
     price: int | None = None
     is_active: bool | None = None
 
@@ -50,6 +50,4 @@ class ProductCreateResponse(BaseModel):
     category_id: int
     name: str
     description: str
-    price: int
-    created_at: datetime
-    updated_at: datetime
+    price: int 
