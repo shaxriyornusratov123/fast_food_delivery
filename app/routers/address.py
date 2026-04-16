@@ -10,7 +10,7 @@ from app.schemas.address import (
     AddressCreateRequest,
     AddressCreatResponse,
     AddressUpdateRequest,
-    AddressListResponse
+    AddressListResponse,
 )
 
 router = APIRouter(prefix="/address", tags=["Address"])
@@ -18,15 +18,16 @@ router = APIRouter(prefix="/address", tags=["Address"])
 geolocator = Nominatim(user_agent="fast_food")
 
 
-@router.get("/location/{address_id}",response_model=AddressListResponse)
+@router.get("/location/{address_id}", response_model=AddressListResponse)
 async def get_location(session: db_dep, address_id: int):
-    stmt=select(Address).where(Address.id==address_id)
-    address=session.execute(stmt).scalars().first()
+    stmt = select(Address).where(Address.id == address_id)
+    address = session.execute(stmt).scalars().first()
 
     if not address:
         raise HTTPException(status_code=404, detail="address not found")
-    
+
     return address
+
 
 @router.post("/create", response_model=AddressCreatResponse)
 async def create_address(

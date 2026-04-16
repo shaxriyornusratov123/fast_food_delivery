@@ -34,9 +34,7 @@ async def create_notification(
                 is_sent_to_all=True,
             )
             session.add(n)
-            send_email_celery.delay(
-                user.email, create_data.title, create_data.message
-            )
+            send_email_celery.delay(user.email, create_data.title, create_data.message)
         session.commit()
         return {"status": "success", "message": "Notification sent to all users"}
 
@@ -62,9 +60,7 @@ async def create_notification(
         session.commit()
         session.refresh(n)
 
-        send_email_celery.delay(
-            user.email, create_data.title, create_data.message
-        )
+        send_email_celery.delay(user.email, create_data.title, create_data.message)
         return n
 
 

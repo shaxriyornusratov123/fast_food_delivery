@@ -84,4 +84,4 @@ async def delete_category(
         raise HTTPException(status_code=404, detail="Category not found")
 
     session.delete(category)
-    session.commit()  
+    session.commit()

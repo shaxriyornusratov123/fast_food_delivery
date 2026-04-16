@@ -1,5 +1,6 @@
+import sqlalchemy
 from datetime import datetime
-
+from enum import Enum
 from sqlalchemy import (
     BigInteger,
     Integer,
@@ -10,13 +11,19 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     func,
-    Enum as SqlEnum
+    Enum as SqlEnum,
 )
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.schemas.delivery import OrderStatus
+
+
+class OrderStatus(str, Enum):
+    created = "created"
+    accepted = "accepted"
+    delivered = "delivered"
+
 
 class BaseModel(Base):
     __abstract__ = True
@@ -66,9 +73,9 @@ class User(BaseModel):
     deliveries: Mapped[list["Delivery"]] = relationship(
         "Delivery", back_populates="courier", lazy="raise_on_sql"
     )
-    # refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
-    #     "RefreshToken", back_populates="user", lazy="raise_on_sql"
-    # )
+    application: Mapped["CourierApplication"] = relationship(
+        back_populates="user", uselist=False
+    )
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', phone='{self.phone}')>"
@@ -83,7 +90,7 @@ class Order(BaseModel):
         BigInteger, ForeignKey("promocodes.id"), nullable=True
     )
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
-    status: Mapped[str] = mapped_column(String(50), default="created")   
+    status : Mapped[str]= mapped_column( String, default="created")
     total_price: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped["User"] = relationship(
@@ -403,3 +410,19 @@ class TokenBlancList(Base):
 
     def __repr__(self):
         return self.token
+
+
+class CourierApplication(Base):
+    __tablename__ = "courier_applications"
+
+    id: Mapped[str] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[str] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True)
+    status: Mapped[str] = mapped_column(String, default="PENDING")
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    admin_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    user: Mapped["User"] = relationship(back_populates="application")

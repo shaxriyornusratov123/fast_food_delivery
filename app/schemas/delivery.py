@@ -9,13 +9,17 @@ class OrderStatus(str, Enum):
     ON_THE_WAY = "on the way"
     DELIVERED = "delivered"
     CANCELED = "canceled"
+
+
 class UpdateStatusRequest(BaseModel):
     status: OrderStatus
+
 
 class DeliveryUpdateRequest(BaseModel):
     order_id: int
     courier_id: int
     status: OrderStatus
+
 
 valid_transitions = {
     OrderStatus.CREATED: [OrderStatus.ACCEPTED, OrderStatus.CANCELED],
@@ -25,6 +29,7 @@ valid_transitions = {
     OrderStatus.DELIVERED: [],
     OrderStatus.CANCELED: [],
 }
+
 
 class DeliveryCreateResponse(BaseModel):
     id: int

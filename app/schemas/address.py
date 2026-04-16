@@ -20,8 +20,9 @@ class AddressUpdateRequest(BaseModel):
     latitude: float | None = None
     longitude: float | None = None
 
+
 class AddressListResponse(BaseModel):
     id: int
-    location_name:str
+    location_name: str
     latitude: float
     longitude: float

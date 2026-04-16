@@ -11,10 +11,13 @@ from .category import router as subcategory_router
 from .payment import router as payment_router
 from .delivery import router as delivery_router
 from .discount import router as discount_router
-
+from .courier import router as courier_router
+from .courier_admin import router as courier_admin_router
 
 __all__ = [
     "auth_router",
+    "courier_admin_router",
+    "courier_router",
     "product_router",
     "order_router",
     "cart_router",

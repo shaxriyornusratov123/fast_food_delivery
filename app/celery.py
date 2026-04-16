@@ -19,4 +19,3 @@ def send_email_celery(self, to_email: str, subject: str, body: str):
         return True
     except Exception as e:
         raise self.retry(e=e)
-

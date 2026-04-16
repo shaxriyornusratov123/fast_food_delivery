@@ -4,6 +4,7 @@ from app.database import engine
 from app.models import (
     User,
     Product,
+    CourierApplication,
     Payment,
     Promocodes,
     Discount,
@@ -21,6 +22,7 @@ from app.models import (
 from app.admin.views import (
     UserAdminView,
     OrderAdminView,
+    CourierApplicationView,
     ProductAdminView,
     CategoryAdminView,
     CartAdminView,
@@ -40,9 +42,9 @@ admin = Admin(engine=engine, title="Foodify admin", base_url="/admin")
 
 admin.add_view(UserAdminView(User, icon="fa fa-user"))
 admin.add_view(OrderAdminView(Order, icon="fa fa-receipt"))
+admin.add_view(CourierApplicationView(CourierApplication, icon="fa fa-file-text"))
 admin.add_view(ProductAdminView(Product, icon="fa fa-utensils"))
 admin.add_view(CategoryAdminView(Category, icon="fa fa-folder"))
-# admin.add_view(SubcategoryAdminView(Subcategory, icon="fa fa-folder-open"))
 admin.add_view(CartAdminView(Cart, icon="fa fa-shopping-cart"))
 admin.add_view(AddressAdminView(Address, icon="fa fa-location-dot"))
 admin.add_view(PaymentAdminView(Payment, icon="fa fa-money-bill"))

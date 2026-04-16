@@ -1,4 +1,5 @@
 from starlette_admin.contrib.sqla import ModelView
+from starlette_admin.fields import HasOne, HasMany
 
 
 class UserAdminView(ModelView):
@@ -51,7 +52,7 @@ class OrderAdminView(ModelView):
 class ProductAdminView(ModelView):
     fields = ["id", "category_id", "image_id", "name", "description", "price"]
 
-    exclude_fields_from_list = [ "description"]
+    exclude_fields_from_list = ["description"]
     exclude_fields_from_create = ["id"]
     exclude_fields_from_edit = ["id"]
 
@@ -232,4 +233,15 @@ class DeliveryAdminView(ModelView):
         "courier_id",
         "created_at",
         "updated_at",
+    ]
+
+class CourierApplicationView(ModelView):
+    fields=[
+        "id",
+        "user_id",
+        "status",
+        "message",
+        "admin_note",
+        "created_at",
+        "updated_at"
     ]

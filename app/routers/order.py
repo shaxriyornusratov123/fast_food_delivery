@@ -126,7 +126,7 @@ async def create_order(
         order.promocode_id = code.id
 
     order.total_price = total
-    session.commit() 
+    session.commit()
 
     courier = (
         session.execute(select(User).where(User.is_courier == True)).scalars().first()
@@ -157,4 +157,3 @@ async def create_order(
     )
     order = session.execute(order_stmt).scalars().first()
     return order
-
