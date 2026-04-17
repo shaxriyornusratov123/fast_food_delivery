@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from typing import List
 
 from app.database import db_dep
-from app.models import User, CourierApplication
+from app.models import User, CourierApplication, CourierWallet
 from app.schemas.courier import ApplicationStatus, ApplicationWithUser, DecisionRequest
 from app.dependencies import current_user_dep
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 
 @router.get("/applications", response_model=List[ApplicationWithUser])
-def list_applications(
+async def list_applications(
     session: db_dep,
     current_user: current_user_dep,
     status: ApplicationStatus | None = None,
@@ -31,8 +31,9 @@ def list_applications(
 
     return apps
 
+
 @router.get("/applications/{application_id}", response_model=ApplicationWithUser)
-def get_application(
+async def get_application(
     application_id: str,
     session: db_dep,
     current_user: current_user_dep,
@@ -51,7 +52,7 @@ def get_application(
 @router.patch(
     "/applications/{application_id}/decision", response_model=ApplicationWithUser
 )
-def make_decision(
+async def make_decision(
     application_id: str,
     data: DecisionRequest,
     session: db_dep,
@@ -67,13 +68,13 @@ def make_decision(
     if app.status != ApplicationStatus.PENDING:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Заявка уже обработана (статус: {app.status})",
+            detail=f"The application has already been processed. (status: {app.status})",
         )
 
     if data.status == ApplicationStatus.PENDING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Нельзя установить статус PENDING вручную",
+            detail="You cannot set the status to PENDING manually",
         )
 
     if not (current_user.is_staff or current_user.is_superuser):
@@ -84,8 +85,15 @@ def make_decision(
     if data.status == ApplicationStatus.APPROVED:
         stmt = select(User).where(User.id == app.user_id)
         user = session.execute(stmt).scalars().first()
-
         user.is_courier = True
+
+        wallet=CourierWallet(
+            courier_id=user.id,
+            balance=0.0,
+            pending_balance=0.0,
+            currency="UZS"
+        )
+        session.add(wallet)
 
     session.commit()
     session.refresh(app)

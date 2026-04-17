@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
 
@@ -17,7 +17,7 @@ class UserOut(BaseModel):
     id: int
     name: str | None = None
     email: str
-    username: str | None = None 
+    username: str | None = None
     phone: str | None = None
     role: Role | None = None
     created_at: datetime

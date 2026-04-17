@@ -17,16 +17,24 @@ revision: str = "200dc8901a9f"
 down_revision: Union[str, Sequence[str], None] = "fc3546d8ffde"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
+
 def upgrade() -> None:
     order_status_enum = sa.Enum(
-        "CREATED", "ACCEPTED", "COOKING", "ON_THE_WAY", "DELIVERED", "CANCELED",
+        "CREATED",
+        "ACCEPTED",
+        "COOKING",
+        "ON_THE_WAY",
+        "DELIVERED",
+        "CANCELED",
         name="orderstatus",
     )
     order_status_enum.create(op.get_bind(), checkfirst=True)
 
     # 1. Убираем дефолт
     op.alter_column(
-        "orders", "status",
+        "orders",
+        "status",
         existing_type=sa.VARCHAR(length=50),
         server_default=None,
         existing_nullable=False,
@@ -40,7 +48,8 @@ def upgrade() -> None:
 
     # 3. Меняем тип
     op.alter_column(
-        "orders", "status",
+        "orders",
+        "status",
         existing_type=sa.VARCHAR(length=50),
         type_=order_status_enum,
         existing_nullable=False,
@@ -49,7 +58,8 @@ def upgrade() -> None:
 
     # 4. Новый дефолт
     op.alter_column(
-        "orders", "status",
+        "orders",
+        "status",
         existing_type=order_status_enum,
         server_default="CREATED",
         existing_nullable=False,

@@ -1,5 +1,4 @@
 from starlette_admin.contrib.sqla import ModelView
-from starlette_admin.fields import HasOne, HasMany
 
 
 class UserAdminView(ModelView):
@@ -20,7 +19,6 @@ class UserAdminView(ModelView):
     ]
 
     exclude_fields_from_list = ["password_hash", "deleted_email", "is_deleted"]
-
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
     exclude_fields_from_edit = ["id", "password_hash", "created_at", "updated_at"]
 
@@ -28,29 +26,30 @@ class UserAdminView(ModelView):
 class OrderAdminView(ModelView):
     fields = [
         "id",
-        "user_id",
-        "address_id",
-        "promocode_id",
-        "branch_id",
+        "user",           
+        "address",        
+        "promocode",     
+        "branch",         
         "status",
         "total_price",
         "created_at",
         "updated_at",
     ]
 
-    exclude_fields_from_list = ["user_id", "address_id", "promocode_id", "branch_id"]
+    exclude_fields_from_list = ["address", "promocode"]
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
-    exclude_fields_from_edit = [
-        "id",
-        "created_at",
-        "updated_at",
-        "user_id",
-        "address_id",
-    ]
+    exclude_fields_from_edit = ["id", "created_at", "updated_at", "user", "address"]
 
 
 class ProductAdminView(ModelView):
-    fields = ["id", "category_id", "image_id", "name", "description", "price"]
+    fields = [
+        "id",
+        "category",       
+        "image",          
+        "name",
+        "description",
+        "price",
+    ]
 
     exclude_fields_from_list = ["description"]
     exclude_fields_from_create = ["id"]
@@ -64,45 +63,38 @@ class CategoryAdminView(ModelView):
     exclude_fields_from_edit = ["id"]
 
 
-class SubcategoryAdminView(ModelView):
-    fields = ["id", "category_id", "name"]
-
-    exclude_fields_from_create = ["id"]
-    exclude_fields_from_edit = ["id"]
-
-
 class CartAdminView(ModelView):
-    fields = ["id", "user_id", "total_price", "created_at", "updated_at"]
-
-    exclude_fields_from_create = ["id", "total_price", "created_at", "updated_at"]
-    exclude_fields_from_edit = [
+    fields = [
         "id",
-        "user_id",
+        "user",           
         "total_price",
         "created_at",
         "updated_at",
     ]
 
+    exclude_fields_from_create = ["id", "total_price", "created_at", "updated_at"]
+    exclude_fields_from_edit = ["id", "user", "total_price", "created_at", "updated_at"]
+
 
 class AddressAdminView(ModelView):
-    fields = ["id", "user_id", "latitude", "longitude", "created_at", "updated_at"]
-
-    exclude_fields_from_list = ["created_at", "updated_at"]
-    exclude_fields_from_create = ["id", "created_at", "updated_at"]
-    exclude_fields_from_edit = [
+    fields = [
         "id",
-        "user_id",
+        "user",           
         "latitude",
         "longitude",
         "created_at",
         "updated_at",
     ]
 
+    exclude_fields_from_list = ["created_at", "updated_at"]
+    exclude_fields_from_create = ["id", "created_at", "updated_at"]
+    exclude_fields_from_edit = ["id", "user", "latitude", "longitude", "created_at", "updated_at"]
+
 
 class PaymentAdminView(ModelView):
     fields = [
         "id",
-        "order_id",
+        "order",          
         "amount",
         "payment_type",
         "status",
@@ -111,16 +103,9 @@ class PaymentAdminView(ModelView):
         "updated_at",
     ]
 
-    exclude_fields_from_list = ["order_id", "paymant_type", "created_at", "updated_at"]
+    exclude_fields_from_list = ["payment_type", "created_at", "updated_at"]
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
-    exclude_fields_from_edit = [
-        "id",
-        "order_id",
-        "amount",
-        "payment_type",
-        "created_at",
-        "updated_at",
-    ]
+    exclude_fields_from_edit = ["id", "order", "amount", "payment_type", "created_at", "updated_at"]
 
 
 class PromocodeAdminView(ModelView):
@@ -141,8 +126,8 @@ class PromocodeAdminView(ModelView):
 class NotificationAdminView(ModelView):
     fields = [
         "id",
-        "user_id",
-        "image_id",
+        "user",          
+        "image",          
         "title",
         "message",
         "is_read",
@@ -150,13 +135,20 @@ class NotificationAdminView(ModelView):
         "created_at",
         "updated_at",
     ]
-    exclude_fields_from_list = ["user_id", "image_id", "message"]
+
+    exclude_fields_from_list = ["user", "image", "message"]
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
     exclude_fields_from_edit = ["id", "created_at", "updated_at"]
 
 
 class LikeAdminView(ModelView):
-    fields = ["id", "user_id", "product_id", "created_at", "updated_at"]
+    fields = [
+        "id",
+        "user",           
+        "product",        
+        "created_at",
+        "updated_at",
+    ]
 
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
     exclude_fields_from_edit = ["id", "created_at", "updated_at"]
@@ -167,24 +159,6 @@ class ImageAdminView(ModelView):
 
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
     exclude_fields_from_edit = ["id", "created_at", "updated_at"]
-
-
-class CourierAdminView(ModelView):
-    fields = [
-        "id",
-        "branch_id",
-        "first_name",
-        "last_name",
-        "phone",
-        "vehicle_type",
-        "is_active",
-        "created_at",
-        "updated_at",
-    ]
-
-    exclude_fields_from_create = ["id", "created_at", "updated_at"]
-    exclude_fields_from_edit = ["id", "created_at", "updated_at"]
-    exclude_fields_from_list = ["created_at", "updated_at"]
 
 
 class BranchAdminView(ModelView):
@@ -216,32 +190,65 @@ class DiscountAdminView(ModelView):
 class DeliveryAdminView(ModelView):
     fields = [
         "id",
-        "order_id",
-        "courier_id",
-        "branch_id",
+        "order",          
+        "courier",        
+        "branch",        
         "status",
         "delivery_time",
         "created_at",
         "updated_at",
     ]
 
-    exclude_fields_from_list = ["order_id", "courier_id", "created_at", "updated_at"]
+    exclude_fields_from_list = ["order", "courier", "created_at", "updated_at"]
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
-    exclude_fields_from_edit = [
-        "id",
-        "order_id",
-        "courier_id",
-        "created_at",
-        "updated_at",
-    ]
+    exclude_fields_from_edit = ["id", "order", "courier", "created_at", "updated_at"]
+
 
 class CourierApplicationView(ModelView):
-    fields=[
+    fields = [
         "id",
-        "user_id",
+        "user",           
         "status",
         "message",
         "admin_note",
         "created_at",
-        "updated_at"
+        "updated_at",
     ]
+
+    exclude_fields_from_list = ["message", "created_at", "updated_at"]
+    exclude_fields_from_create = ["id", "created_at", "updated_at"]
+    exclude_fields_from_edit = ["id", "created_at", "updated_at"]
+
+
+class CourierWalletAdminView(ModelView):
+    fields = [
+        "id",
+        "courier",        
+        "balance",
+        "pending_balance",
+        "currency",
+        "created_at",
+        "updated_at",
+    ]
+
+    exclude_fields_from_list = ["created_at", "updated_at"]
+    exclude_fields_from_create = ["id", "created_at", "updated_at"]
+    exclude_fields_from_edit = ["id", "created_at", "updated_at" , "balance", "pending_balance","currency"]
+
+
+class WalletTransactionAdminView(ModelView):
+    fields = [
+        "id",
+        "wallet",         
+        "order",          
+        "amount",
+        "type",
+        "status",
+        "description",
+        "created_at",
+        "updated_at",
+    ]
+
+    exclude_fields_from_list = ["description", "created_at", "updated_at"]
+    exclude_fields_from_create = ["id", "created_at", "updated_at"]
+    exclude_fields_from_edit = ["id", "created_at", "updated_at"] 

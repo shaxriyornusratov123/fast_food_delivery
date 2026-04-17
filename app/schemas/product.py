@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from fastapi import Form
-from datetime import datetime
 
 
 class ProductListResponse(BaseModel):

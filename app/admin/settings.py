@@ -17,6 +17,8 @@ from app.models import (
     Cart,
     Category,
     Order,
+    CourierWallet,
+    WalletTransaction
 )
 
 from app.admin.views import (
@@ -35,6 +37,8 @@ from app.admin.views import (
     BranchAdminView,
     DiscountAdminView,
     DeliveryAdminView,
+    CourierWalletAdminView,
+    WalletTransactionAdminView
 )
 
 
@@ -55,3 +59,5 @@ admin.add_view(ImageAdminView(Image, icon="fa fa-image"))
 admin.add_view(BranchAdminView(Branches, icon="fa fa-store"))
 admin.add_view(DiscountAdminView(Discount, icon="fa fa-percent"))
 admin.add_view(DeliveryAdminView(Delivery, icon="fa fa-shipping-fast"))
+admin.add_view(CourierWalletAdminView(CourierWallet, icon="fa fa-wallet"))
+admin.add_view(WalletTransactionAdminView(WalletTransaction, icon="fa fa-exchange-alt"))

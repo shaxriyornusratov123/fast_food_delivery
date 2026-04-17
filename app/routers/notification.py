@@ -1,11 +1,10 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from typing import List
 
 from app.database import db_dep
 from app.models import Notification, User
 from app.schemas.notification import NotificationCreateRequest, NotificationReadResponse
-from app.utils import send_email
 from app.dependencies import current_user_dep
 from app.celery import send_email_celery
 

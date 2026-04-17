@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from app.database import db_dep
-from app.schemas.branches import Branch_create_req, Branch_update_req, Branch_delete_req
+from app.schemas.branches import Branch_create_req, Branch_update_req
 from app.models import Branches
 from app.dependencies import current_user_dep
 
