@@ -10,6 +10,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     func,
+    Enum as ASEnum
 )
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -114,6 +115,9 @@ class Order(BaseModel):
     )
     delivery: Mapped["Delivery"] = relationship(
         "Delivery", back_populates="order", lazy="raise_on_sql", uselist=False
+    )
+    status_transitions: Mapped[list["OrderStatusTransition"]] = relationship(
+        "OrderStatusTransition", back_populates="order", lazy="raise_on_sql"
     )
 
     def __repr__(self):
@@ -402,7 +406,7 @@ class Discount(BaseModel):
         return f"<name {self.name}>"
 
 
-class TokenBlancList(Base):
+class TokenBlackList(Base):
     __tablename__ = "token_blanc_list"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -413,20 +417,15 @@ class TokenBlancList(Base):
         return self.token
 
 
-class CourierApplication(Base):
+class CourierApplication(BaseModel):
     __tablename__ = "courier_applications"
 
-    id: Mapped[str] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[str] = mapped_column(
         BigInteger, ForeignKey("users.id"), unique=True
     )
     status: Mapped[str] = mapped_column(String, default="PENDING")
     message: Mapped[str | None] = mapped_column(Text, nullable=True)
     admin_note: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
 
     user: Mapped["User"] = relationship(back_populates="application")
 
@@ -473,3 +472,23 @@ class WalletTransaction(BaseModel):
 
     def __repr__(self):
         return f"<WalletTransaction(id={self.id}, wallet_id={self.wallet_id}, amount={self.amount}, type='{self.type}')>"
+
+
+class OrderStatusTransition(Base):
+    __tablename__ = "order_status_transitions"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    order_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("orders.id"))
+    from_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    to_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+
+    order: Mapped["Order"] = relationship(
+        "Order", back_populates="status_transitions", lazy="raise_on_sql"
+    )
+
+    def __repr__(self):
+        return f"<OrderStatusTransition {self.from_status} → {self.to_status}>"

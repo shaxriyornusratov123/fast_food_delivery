@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.dependencies import current_user_dep, credentials_dep
 from app.schemas.user import UserProfileResponse, UserUpdateRequest
 from app.database import db_dep
-from app.models import TokenBlancList
+from app.models import TokenBlackList
 
 router = APIRouter(
     prefix="/users",
@@ -58,13 +58,13 @@ async def logout(
     if not token:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    stmt = select(TokenBlancList).where(TokenBlancList.token == token)
+    stmt = select(TokenBlackList).where(TokenBlackList.token == token)
     token = session.execute(stmt).scalars().first()
 
     if token:
         raise HTTPException(status_code=400, detail="Token already invalidated")
 
-    blanc_list_token = TokenBlancList(token=token)
+    blanc_list_token = TokenBlackList(token=token)
     session.add(blanc_list_token)
     session.commit()
 

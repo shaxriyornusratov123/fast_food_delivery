@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -6,21 +7,25 @@ from app.models import (
     Order,
     Product,
     OrderItem,
+    OrderStatus,
     Promocodes,
     Cart,
     CartItem,
     Address,
     Delivery,
     User,
+    OrderStatusTransition
 )
 from app.database import db_dep
 from app.schemas.order import (
     OrderListResponse,
     OrederCreateRequest,
     OrderCreateResponse,
+    OrderTransitionRequest
 )
 from app.dependencies import current_user_dep
 from app.utils import calculate_discounted_price
+from app.schemas.delivery import valid_transitions
 
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
@@ -157,3 +162,40 @@ async def create_order(
     )
     order = session.execute(order_stmt).scalars().first()
     return order
+
+
+@router.post("order/transitions")
+async def order_transition(session: db_dep, order_id : int, create_data: OrderTransitionRequest):
+    stmt = select(Order).where(Order.id == order_id)
+    order = session.execute(stmt).scalars().first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    current_status = OrderStatus(order.status)
+    new_status = create_data.status
+
+    if new_status not in valid_transitions.get(current_status, []):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot change status from {current_status.value} to {new_status.value}",
+        )
+
+    order.status = new_status.value
+
+    session.commit()
+
+ 
+    transition = OrderStatusTransition(
+        from_status=order.status,
+        to_status=create_data.to_status,
+        created_at=create_data.utcnow(),
+    )
+    order.status = create_data.to_status
+    order.updated_at = datetime.utcnow()
+ 
+    session.add(transition)
+    session.commit()
+    session.refresh(transition)
+    return transition
+    
+

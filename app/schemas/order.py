@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+from app.models import OrderStatus
+
 
 class OrderItemCreateRequest(BaseModel):
     product_id: int
@@ -64,3 +66,7 @@ class OrderCreateResponse(BaseModel):
     promocode_id: int | None
     total_price: float
     order_items: list[OrderItemResponse]
+
+
+class OrderTransitionRequest(BaseModel):
+    to_status: OrderStatus
