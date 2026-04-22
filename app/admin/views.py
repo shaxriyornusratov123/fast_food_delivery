@@ -225,7 +225,6 @@ class CourierWalletAdminView(ModelView):
         "id",
         "courier",        
         "balance",
-        "pending_balance",
         "currency",
         "created_at",
         "updated_at",
@@ -233,7 +232,7 @@ class CourierWalletAdminView(ModelView):
 
     exclude_fields_from_list = ["created_at", "updated_at"]
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
-    exclude_fields_from_edit = ["id", "created_at", "updated_at" , "balance", "pending_balance","currency"]
+    exclude_fields_from_edit = ["id", "created_at", "updated_at" , "balance", "currency"]
 
 
 class WalletTransactionAdminView(ModelView):
@@ -242,9 +241,6 @@ class WalletTransactionAdminView(ModelView):
         "wallet",         
         "order",          
         "amount",
-        "type",
-        "status",
-        "description",
         "created_at",
         "updated_at",
     ]
@@ -252,3 +248,18 @@ class WalletTransactionAdminView(ModelView):
     exclude_fields_from_list = ["description", "created_at", "updated_at"]
     exclude_fields_from_create = ["id", "created_at", "updated_at"]
     exclude_fields_from_edit = ["id", "created_at", "updated_at"] 
+
+
+class OrderStatusTransitionsView(ModelView):
+    fields=[
+        "id",
+        "order",
+        "from_status",
+        "to_status",
+        "reason",
+        "created_at"
+    ]
+
+    exclude_fields_from_create=["id","order","from_status","to_status","reason","created_at"]
+    exclude_fields_from_list=["reason"]
+    exclude_fields_from_edit=["id","order","from_status","to_status","reason","created_at"]

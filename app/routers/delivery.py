@@ -2,10 +2,8 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
-from app.models import Delivery, User, Order, Notification,OrderStatusTransition
+from app.models import Delivery, Order, Notification,OrderStatusTransition,WalletTransaction, CourierWallet
 from app.schemas.delivery import (
-    DeliveryUpdateRequest,
-    DeliveryCreateResponse,
     OrderStatus,
 )
 from app.database import db_dep
@@ -55,7 +53,7 @@ async def get_available_orders(session: db_dep):
  
     orders = session.execute(
         select(Order)
-        .where(Order.status == OrderStatus.ACCEPTED.value)
+        .where(Order.status == OrderStatus.CREATED.value)
         .where(Order.id.notin_(taken_order_ids))
         .order_by(Order.created_at)
     ).scalars().all()
@@ -86,12 +84,27 @@ async def get_active_orders(session: db_dep, current_user: current_user_dep):
 
 @router.put("/orders/{order_id}/status")
 async def update_order_status(
-    session: db_dep, order_id: int, data: UpdateStatusRequest
+    session: db_dep, 
+    order_id: int, 
+    data: UpdateStatusRequest,
+    current_user: current_user_dep
 ):
-    stmt = select(Order).where(Order.id == order_id)
-    order = session.execute(stmt).scalars().first()
+    order = session.execute(
+        select(Order).where(Order.id == order_id)
+    ).scalars().first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+
+    delivery = session.execute(
+        select(Delivery)
+        .where(Delivery.order_id == order_id)
+        .where(Delivery.courier_id == current_user.id)
+    ).scalars().first()
+    if not delivery:
+        raise HTTPException(
+            status_code=403, 
+            detail="You are not the courier of this order"
+        )
 
     current_status = OrderStatus(order.status)
     new_status = data.status
@@ -107,11 +120,41 @@ async def update_order_status(
         from_status=current_status.value,
         to_status=new_status.value,
         reason=getattr(data, "reason", None),
+        created_at=datetime.utcnow(),
     )
     session.add(transition)
 
     order.status = new_status.value
+    order.updated_at = datetime.utcnow()
     session.commit()
+
+    if new_status == OrderStatus.DELIVERED:
+        COURIER_FEE = 0.1  # 10% от заказа
+        earning = order.total_price * COURIER_FEE
+
+        wallet = session.execute(
+            select(CourierWallet)
+            .where(CourierWallet.courier_id == current_user.id)
+        ).scalars().first()
+
+        if not wallet:
+            wallet = CourierWallet(
+                courier_id=current_user.id,
+                balance=0.0,
+                currency="UZS"
+            )
+            session.add(wallet)
+            session.flush()
+
+        wallet.balance += earning
+
+        transaction = WalletTransaction(
+            wallet_id=wallet.id,
+            order_id=order_id,
+            amount=earning,
+        )
+        session.add(transaction)
+        session.commit()
 
     notification_data = STATUS_MESSAGES.get(new_status)
     if notification_data:
@@ -130,40 +173,25 @@ async def update_order_status(
 
 
 
-
-
-@router.post("order/{order_id}/take")
+@router.post("/orders/{order_id}/take")
 async def take_order(session: db_dep, order_id: int, current_user: current_user_dep):
     order = session.execute(
         select(Order).where(Order.id == order_id)
     ).scalars().first()
-
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    
-    if order.status != OrderStatus.ACCEPTED.value:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Order is not available for pickup. Current status: '{order.status}'")
-    
+
+    if order.status != OrderStatus.CREATED.value:  # ✅ проверяем CREATED
+        raise HTTPException(status_code=400, detail=f"Order status: '{order.status}'")
+
     existing = session.execute(
         select(Delivery)
         .where(Delivery.order_id == order_id)
         .where(Delivery.courier_id.isnot(None))
     ).scalars().first()
-
     if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="Order already taken by another courier",
-        )
- 
-    courier = session.execute(
-        select(User).where(User.id == current_user.id)
-    ).scalars().first()
-    if not courier:
-        raise HTTPException(status_code=404, detail="Courier not found")
- 
+        raise HTTPException(status_code=409, detail="Order already taken by another courier")
+
     active_delivery = session.execute(
         select(Delivery)
         .join(Order, Delivery.order_id == Order.id)
@@ -171,19 +199,31 @@ async def take_order(session: db_dep, order_id: int, current_user: current_user_
         .where(Order.status.in_(ACTIVE_STATUSES))
     ).scalars().first()
     if active_delivery:
-        raise HTTPException(
-            status_code=400,
-            detail="You already have an active order. Finish it before taking a new one.",
-        )
- 
+        raise HTTPException(status_code=400, detail="Finish your current order first.")
+
+    transition = OrderStatusTransition(
+        order_id=order_id,
+        from_status=OrderStatus.CREATED.value,
+        to_status=OrderStatus.ACCEPTED.value,
+        created_at=datetime.utcnow(),
+    )
+    session.add(transition)
+
+    order.status = OrderStatus.ACCEPTED.value
+    order.updated_at = datetime.utcnow()
+
     delivery = Delivery(
         order_id=order_id,
-        courier_id= current_user.id,
+        courier_id=current_user.id,
+        branch_id=order.branch_id,
+        status="assigned",
         assigned_at=datetime.utcnow(),
     )
     session.add(delivery)
     session.commit()
     session.refresh(delivery)
+    return delivery
+
 
 
 @router.post("/orders/{order_id}/drop")
@@ -211,5 +251,3 @@ async def drop_order(session: db_dep, order_id: int, current_user: current_user_
     session.commit()
  
     return {"message": "Order dropped. It is available for other couriers again."}
- 
-

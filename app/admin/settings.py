@@ -18,7 +18,8 @@ from app.models import (
     Category,
     Order,
     CourierWallet,
-    WalletTransaction
+    WalletTransaction,
+    OrderStatusTransition
 )
 
 from app.admin.views import (
@@ -38,7 +39,8 @@ from app.admin.views import (
     DiscountAdminView,
     DeliveryAdminView,
     CourierWalletAdminView,
-    WalletTransactionAdminView
+    WalletTransactionAdminView,
+    OrderStatusTransitionsView
 )
 
 
@@ -61,3 +63,4 @@ admin.add_view(DiscountAdminView(Discount, icon="fa fa-percent"))
 admin.add_view(DeliveryAdminView(Delivery, icon="fa fa-shipping-fast"))
 admin.add_view(CourierWalletAdminView(CourierWallet, icon="fa fa-wallet"))
 admin.add_view(WalletTransactionAdminView(WalletTransaction, icon="fa fa-exchange-alt"))
+admin.add_view(OrderStatusTransitionsView(OrderStatusTransition, icon="fa fa-exchange-alt"))

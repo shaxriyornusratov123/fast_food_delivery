@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, UploadFile, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from pathlib import Path
 import shutil
@@ -33,6 +34,16 @@ async def get_products(session: db_dep, search: str | None = None):
         raise HTTPException(status_code=404, detail="Products not found")
 
     return product
+
+
+@router.get("/image/{image_id}")
+async def get_product_image(session: db_dep, image_id: int):
+    stmt = select(Image).where(Image.id == image_id)
+    res = session.execute(stmt)
+    image = res.scalars().first()
+    if not image or not Path(image.url).exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(image.url)
 
 
 @router.get("/{product_id}", response_model=ProductListResponse)

@@ -9,8 +9,7 @@ from sqlalchemy import (
     Text,
     DateTime,
     ForeignKey,
-    func,
-    Enum as ASEnum
+    func
 )
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,9 +18,9 @@ from app.database import Base
 
 
 class OrderStatus(str, Enum):
-    created = "created"
-    accepted = "accepted"
-    delivered = "delivered"
+    CREATED = "created"
+    ACCEPTED = "accepted"
+    DELIVERED = "delivered"
 
 
 class BaseModel(Base):
@@ -351,11 +350,14 @@ class Delivery(BaseModel):
     __tablename__ = "deliveries"
 
     order_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("orders.id"))
-    courier_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"))
+    courier_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), nullable=True)
     branch_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("branches.id"))
     status: Mapped[str] = mapped_column(String(20), nullable=False)
     delivery_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+    assigned_at: Mapped[datetime] = mapped_column(
+        DateTime, default=func.now(),nullable=True
     )
 
     order: Mapped["Order"] = relationship(
@@ -437,9 +439,8 @@ class CourierWallet(BaseModel):
         BigInteger, ForeignKey("users.id"), unique=True, nullable=False
     )
     balance: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
-    pending_balance: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="UZS")
-
+    
     courier: Mapped["User"] = relationship(
         "User", back_populates="wallet", lazy="raise_on_sql"
     )
@@ -461,9 +462,7 @@ class WalletTransaction(BaseModel):
         BigInteger, ForeignKey("orders.id"), nullable=True
     )
     amount: Mapped[float] = mapped_column(Float, nullable=False)
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
-    description: Mapped[str] = mapped_column(Text, nullable=True)
+
 
     wallet: Mapped["CourierWallet"] = relationship(
         "CourierWallet", back_populates="transactions", lazy="raise_on_sql"
@@ -471,7 +470,7 @@ class WalletTransaction(BaseModel):
     order: Mapped["Order"] = relationship("Order", lazy="raise_on_sql")
 
     def __repr__(self):
-        return f"<WalletTransaction(id={self.id}, wallet_id={self.wallet_id}, amount={self.amount}, type='{self.type}')>"
+        return f"<WalletTransaction(id={self.id}, wallet_id={self.wallet_id}, amount={self.amount}')>"
 
 
 class OrderStatusTransition(Base):

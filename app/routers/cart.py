@@ -15,6 +15,22 @@ from app.models import Cart, CartItem, Product
 router = APIRouter(prefix="/cart", tags=["Cart"])
 
 
+@router.get("cart/{cart_id}", response_model=CartResponse)
+async def get_cart(session: db_dep, cart_id: int):
+    stmt = (
+        select(Cart)
+        .options(
+            selectinload(Cart.cart_items).selectinload(CartItem.product)
+        )
+        .where(Cart.id == cart_id)
+    )
+    result = session.execute(stmt)
+    cart = result.scalars().first()
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+    return cart
+
+
 @router.post(
     "/items", response_model=AddToCartResponse, status_code=status.HTTP_201_CREATED
 )
@@ -23,15 +39,6 @@ async def add_products_to_cart(
     session: db_dep,
     current_user: current_user_dep,
 ):
-
-    product_stmt = select(Product).where(Product.id == create_data.product_id)
-    product = session.execute(product_stmt).scalars().first()
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found",
-        )
-
     cart_stmt = (
         select(Cart)
         .options(selectinload(Cart.cart_items).selectinload(CartItem.product))
@@ -41,43 +48,63 @@ async def add_products_to_cart(
 
     if not cart:
         cart = Cart(user_id=current_user.id, total_price=0)
+        cart.cart_items = []
         session.add(cart)
         session.flush()
-        # cart.cart_items = []
 
-    stmt = select(CartItem).where(
-        CartItem.cart_id == cart.id, CartItem.product_id == product.id
-    )
-    existing = session.execute(stmt).scalars().first()
+    last_cart_item_id = None
 
-    if existing:
-        new_qty = create_data.quantity
-        if new_qty > 99:
+    for item_data in create_data.items:
+        product_stmt = select(Product).where(Product.id == item_data.product_id)
+        product = session.execute(product_stmt).scalars().first()
+        if not product:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Maximum 99 units per product allowed",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Product {item_data.product_id} not found",
             )
-        existing.quantity = new_qty
-        cart_item = existing
-    else:
-        cart_item = CartItem(
-            cart_id=cart.id,
-            product_id=product.id,
-            quantity=create_data.quantity,
-            price=product.price,
-        )
-        session.add(cart_item)
-        session.flush()
 
-    cart.total_price = round(
-        sum(item.price * item.quantity for item in cart.cart_items), 2
-    )
+        stmt = select(CartItem).where(
+            CartItem.cart_id == cart.id, CartItem.product_id == product.id
+        )
+        existing = session.execute(stmt).scalars().first()
+
+        if existing:
+            new_qty = existing.quantity + item_data.quantity
+            if new_qty > 99:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Maximum 99 units per product allowed (product_id={product.id})",
+                )
+            existing.quantity = new_qty
+            cart_item = existing
+        else:
+            cart_item = CartItem(
+                cart_id=cart.id,
+                product_id=product.id,
+                quantity=item_data.quantity,
+                price=product.price,
+            )
+            session.add(cart_item)
+            cart.cart_items.append(cart_item)
+            session.flush()
+
+        last_cart_item_id = cart_item.id
+
     session.commit()
-    return AddToCartResponse(
-        message="Product added to cart successfully",
-        cart_item_id=cart_item.id,
-        cart=cart,
+
+    # Перезагружаем корзину с актуальными данными
+    stmt = (
+        select(Cart)
+        .options(selectinload(Cart.cart_items).selectinload(CartItem.product))
+        .where(Cart.id == cart.id)
     )
+    cart = session.execute(stmt).scalars().first()
+
+    return AddToCartResponse(
+        message="Products added to cart successfully",
+        cart_item_id=last_cart_item_id,
+        cart=cart,
+    ) 
 
 
 @router.patch("/items/{item_id}", response_model=CartResponse)

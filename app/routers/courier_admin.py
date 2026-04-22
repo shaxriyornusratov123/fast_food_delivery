@@ -90,7 +90,6 @@ async def make_decision(
         wallet=CourierWallet(
             courier_id=user.id,
             balance=0.0,
-            pending_balance=0.0,
             currency="UZS"
         )
         session.add(wallet)

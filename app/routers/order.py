@@ -13,7 +13,6 @@ from app.models import (
     CartItem,
     Address,
     Delivery,
-    User,
     OrderStatusTransition
 )
 from app.database import db_dep
@@ -61,7 +60,6 @@ async def create_order(
     create_data: OrederCreateRequest,
     current_user: current_user_dep,
 ):
-
     address_stmt = select(Address).where(Address.user_id == current_user.id)
     address = (session.execute(address_stmt)).scalars().first()
     if not address:
@@ -87,6 +85,7 @@ async def create_order(
         user_id=current_user.id,
         address_id=address.id,
         branch_id=create_data.branch_id,
+        status=OrderStatus.CREATED.value  
     )
     session.add(order)
     session.flush()
@@ -97,7 +96,6 @@ async def create_order(
             raise HTTPException(
                 status_code=404, detail=f"Product with id {item.product_id} not found!"
             )
-
         final_price = calculate_discounted_price(product.price, product.discount)
         total += final_price * item.quantity
 
@@ -131,14 +129,6 @@ async def create_order(
         order.promocode_id = code.id
 
     order.total_price = total
-    session.commit()
-
-    courier = (
-        session.execute(select(User).where(User.is_courier == True)).scalars().first()
-    )
-
-    if not courier:
-        raise HTTPException(status_code=400, detail="No couriers available")
 
     delivery = Delivery(
         order_id=order.id,
@@ -148,7 +138,6 @@ async def create_order(
     )
     session.add(delivery)
     session.commit()
-    session.refresh(order)
 
     order_stmt = (
         select(Order)
