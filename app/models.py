@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from enum import Enum
 from sqlalchemy import (
     BigInteger,
@@ -28,11 +29,11 @@ class BaseModel(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), default=func.now(ZoneInfo("Asia/Tashkent"))
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now(), onupdate=func.now()
-    )
+        DateTime(timezone=True), default=func.now(ZoneInfo("Asia/Tashkent")), onupdate=func.now(ZoneInfo("Asia/Tashkent"))
+    )   
 
 
 class User(BaseModel):
@@ -51,7 +52,6 @@ class User(BaseModel):
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
 
-    # relationships
 
     orders: Mapped[list["Order"]] = relationship(
         "Order", back_populates="user", lazy="raise_on_sql"
@@ -413,8 +413,9 @@ class TokenBlackList(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     token: Mapped[str] = mapped_column(String, unique=True)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now(ZoneInfo("Asia/Tashkent"))
+    )
     def __repr__(self):
         return self.token
 
@@ -482,7 +483,7 @@ class OrderStatusTransition(Base):
     to_status: Mapped[str] = mapped_column(String(20), nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), default=func.now(ZoneInfo("Asia/Tashkent"))
     )
 
     order: Mapped["Order"] = relationship(
@@ -490,4 +491,4 @@ class OrderStatusTransition(Base):
     )
 
     def __repr__(self):
-        return f"<OrderStatusTransition {self.from_status} → {self.to_status}>"
+        return f"<OrderStatusTransition {self.from_status} → {self.to_status}>" 
